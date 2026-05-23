@@ -1,6 +1,6 @@
 # Pixium
 
-A local-first Electron desktop app for managing AI-generated artworks paired with structured text metadata. Browse your creations in a beautiful waterfall layout, organize them into collections, and keep everything at your fingertips.
+A local-first desktop application that stores images together with their supporting structured text information. Browse your creations in a waterfall layout and organize them by albums to keep all content neatly arranged.
 
 > 中文文档请见 [README\_CN.md](./README_CN.md)
 
