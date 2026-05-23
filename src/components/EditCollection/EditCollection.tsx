@@ -140,7 +140,7 @@ export default function EditCollection() {
           <div className="create-collection-left">
             <div className="title-input-section">
               <label className="input-label">相册名称</label>
-              <input type="text" value={title} onChange={e => setTitle(e.target.value)} placeholder="请输入相册名称" className="title-input" required />
+              <input type="text" value={title} onChange={e => setTitle(e.target.value)} placeholder="请输入相册名称" className="title-input" required spellCheck={false} />
             </div>
             <div className="cover-upload-section">
               <h3 className="section-title">封面图片</h3>

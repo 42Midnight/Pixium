@@ -128,6 +128,7 @@ export default function CreateCollection() {
                   placeholder="请输入相册名称"
                   className="title-input"
                   required
+                  spellCheck={false}
                 />
               </div>
               <div className="mode-select-section">

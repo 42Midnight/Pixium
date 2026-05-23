@@ -403,6 +403,7 @@ export default function WaterFall() {
             onKeyDown={e => { if (e.key === 'Enter') { setSubmittedQuery(inputQuery); setShowSuggestions(false); } }}
             onFocus={() => { if (inputQuery.trim()) setShowSuggestions(true); }}
             onBlur={() => setTimeout(() => setShowSuggestions(false), 150)}
+            spellCheck={false}
           />
           {inputQuery.trim() && (
             <button
