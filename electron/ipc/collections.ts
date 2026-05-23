@@ -2,6 +2,30 @@ import { ipcMain } from 'electron';
 import path from 'path';
 import fs from 'fs';
 import { getAppRootPath, getImageURL, ensureDir, deleteFolderContent } from '../context.js';
+import { closeFileWatcher, restartFileWatcher } from './works.js';
+
+function updateNestedInfoFiles(dirPath: string, oldPrefix: string, newPrefix: string): void {
+  for (const item of fs.readdirSync(dirPath)) {
+    const itemPath = path.join(dirPath, item);
+    if (!fs.statSync(itemPath).isDirectory()) continue;
+    const infoPath = path.join(itemPath, 'info.json');
+    if (fs.existsSync(infoPath)) {
+      const info = JSON.parse(fs.readFileSync(infoPath, 'utf-8'));
+      if (info.folder) {
+        if (info.folder === oldPrefix) {
+          info.folder = newPrefix;
+        } else if (info.folder.startsWith(oldPrefix + '/')) {
+          info.folder = newPrefix + '/' + info.folder.substring(oldPrefix.length + 1);
+        }
+      }
+      if (info.images?.length > 0) {
+        info.cover = getImageURL(`image/${info.folder}/${info.images[0]}`);
+      }
+      fs.writeFileSync(infoPath, JSON.stringify(info, null, 2), 'utf-8');
+    }
+    updateNestedInfoFiles(itemPath, oldPrefix, newPrefix);
+  }
+}
 
 export function registerCollectionHandlers(): void {
   ipcMain.handle('create-folder', async (_event, folderName: string) => {
@@ -158,43 +182,75 @@ export function registerCollectionHandlers(): void {
       const oldPath = path.join(imageDir, oldName);
       const newPath = path.join(imageDir, newName);
 
-      if (!fs.existsSync(oldPath) || fs.existsSync(newPath)) {
-        return { success: false, error: '文件夹不存在或新文件夹已存在' };
+      const oldExists = fs.existsSync(oldPath);
+      const newExists = fs.existsSync(newPath);
+
+      if (!oldExists && !newExists) {
+        return { success: false, error: '文件夹不存在' };
+      }
+      if (oldExists && newExists) {
+        return { success: false, error: '新文件夹已存在' };
+      }
+      if (oldName === newName) {
+        return { success: true };
       }
 
-      // Read old info.json
-      let oldWorkInfo: any = null;
-      const oldInfoPath = path.join(oldPath, 'info.json');
-      if (fs.existsSync(oldInfoPath)) {
-        oldWorkInfo = JSON.parse(fs.readFileSync(oldInfoPath, 'utf-8'));
+      // Determine if it's a work or collection rename
+      const isWorkRename =
+        fs.existsSync(path.join(oldPath, 'info.json')) ||
+        fs.existsSync(path.join(newPath, 'info.json'));
+
+      // Rename folder if old path still exists (may have been renamed by a prior failed attempt)
+      if (oldExists) {
+        closeFileWatcher();
+        try {
+          fs.renameSync(oldPath, newPath);
+        } finally {
+          restartFileWatcher();
+        }
       }
 
-      fs.renameSync(oldPath, newPath);
-
-      // Update info.json folder field
-      const newInfoPath = path.join(newPath, 'info.json');
-      if (fs.existsSync(newInfoPath)) {
-        const info = JSON.parse(fs.readFileSync(newInfoPath, 'utf-8'));
-        info.folder = newName;
-        fs.writeFileSync(newInfoPath, JSON.stringify(info, null, 2), 'utf-8');
+      // Update info.json metadata
+      if (isWorkRename) {
+        const infoPath = path.join(newPath, 'info.json');
+        if (fs.existsSync(infoPath)) {
+          const info = JSON.parse(fs.readFileSync(infoPath, 'utf-8'));
+          info.folder = newName;
+          if (info.images?.length > 0) {
+            info.cover = getImageURL(`image/${newName}/${info.images[0]}`);
+          }
+          fs.writeFileSync(infoPath, JSON.stringify(info, null, 2), 'utf-8');
+        }
+      } else {
+        // Collection: fix nested work info.json files
+        updateNestedInfoFiles(newPath, oldName, newName);
       }
 
       // Update collections.json paths
       const collectionsFile = path.join(getAppRootPath(), 'data', 'collections.json');
       if (fs.existsSync(collectionsFile)) {
         const data = JSON.parse(fs.readFileSync(collectionsFile, 'utf-8'));
-        const pathsToReplace = new Set<string>([oldName]);
-        if (oldWorkInfo) {
-          if (oldWorkInfo.id) pathsToReplace.add(oldWorkInfo.id);
-          if (oldWorkInfo.folder) pathsToReplace.add(oldWorkInfo.folder);
-        }
+        const oldPrefix = oldName + '/';
 
         for (const c of data.collections) {
-          if (c.images) {
-            c.images = c.images.map((img: string) => pathsToReplace.has(img) ? newName : img);
+          if (c.folder === oldName) {
+            c.folder = newName;
           }
-          if (c.cover && pathsToReplace.has(c.cover)) {
-            c.cover = newName;
+
+          if (c.images) {
+            c.images = c.images.map((img: string) => {
+              if (img === oldName) return newName;
+              if (img.startsWith(oldPrefix)) return newName + '/' + img.substring(oldPrefix.length);
+              return img;
+            });
+          }
+
+          if (c.cover) {
+            if (c.cover === oldName) {
+              c.cover = newName;
+            } else if (c.cover.startsWith(oldPrefix)) {
+              c.cover = newName + '/' + c.cover.substring(oldPrefix.length);
+            }
           }
         }
         fs.writeFileSync(collectionsFile, JSON.stringify(data, null, 2), 'utf-8');
@@ -268,7 +324,12 @@ export function registerCollectionHandlers(): void {
         workInfo = JSON.parse(fs.readFileSync(sourceInfoPath, 'utf-8'));
       }
 
-      fs.renameSync(workFolderPath, targetWorkPath);
+      closeFileWatcher();
+      try {
+        fs.renameSync(workFolderPath, targetWorkPath);
+      } finally {
+        restartFileWatcher();
+      }
 
       // Update info.json in new location
       const newFolder = `${targetFolderName}/${workBaseName}`;

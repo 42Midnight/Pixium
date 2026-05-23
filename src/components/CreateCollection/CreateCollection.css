@@ -8,7 +8,8 @@
 /* 创建相册表单 */
 .create-collection-form {
   display: flex;
-  justify-content: center;
+  flex-direction: column;
+  align-items: center;
 }
 
 /* 左侧：封面上传区域 */
@@ -258,7 +259,7 @@
 /* 底部操作按钮区域 */
 .create-collection-footer {
   display: flex;
-  justify-content: flex-end;
+  justify-content: center;
   gap: 12px;
   margin-top: 30px;
 }

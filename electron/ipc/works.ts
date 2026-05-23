@@ -174,3 +174,24 @@ export function registerWorkHandlers(): void {
     }
   });
 }
+
+export function closeFileWatcher(): void {
+  if (fileWatcher) {
+    fileWatcher.close();
+    fileWatcher = null;
+  }
+}
+
+export function restartFileWatcher(): void {
+  if (fileWatcher) return; // already running
+  const imagePath = path.join(getAppRootPath(), 'image');
+  if (!fs.existsSync(imagePath)) return;
+  fileWatcher = fs.watch(imagePath, { recursive: true }, (_eventType, filename) => {
+    if (filename?.includes('info.json')) {
+      const win = getMainWindow();
+      if (win?.webContents) {
+        win.webContents.send('works-changed');
+      }
+    }
+  });
+}

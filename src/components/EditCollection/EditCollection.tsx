@@ -83,33 +83,42 @@ export default function EditCollection() {
         if (urlResult.success && urlResult.url) newCover = urlResult.url;
       }
 
-      const updatedCollection: Collection = {
-        ...originalCollection,
-        name: title.trim(),
-        cover: newCover,
-        coverPosition,
-      };
-
       // Rename if title changed
-      if (title.trim() !== originalCollection.name && api) {
+      const nameChanged = title.trim() !== originalCollection.name;
+      if (nameChanged && api) {
         const newFolderName = sanitizeFolderName(title.trim());
-        await api.renameFolder(originalCollection.folder, newFolderName);
-        updatedCollection.folder = newFolderName;
-
-        if (updatedCollection.cover) {
-          await api.renameFolder(`collection_covers/${originalCollection.folder}`, `collection_covers/${newFolderName}`);
-          const fileName = updatedCollection.cover.split('/').pop()!;
-          const urlResult = await api.getImageURL(`image/collection_covers/${newFolderName}/${fileName}`);
-          if (urlResult.success && urlResult.url) updatedCollection.cover = urlResult.url;
+        const renameResult = await api.renameFolder(originalCollection.folder, newFolderName);
+        if (!renameResult.success) {
+          alert('重命名文件夹失败：' + renameResult.error);
+          setIsSaving(false);
+          return;
         }
       }
 
       if (api) {
+        // Handle cover folder rename before reading collections
+        if (nameChanged && newCover) {
+          const newFolderName = sanitizeFolderName(title.trim());
+          await api.renameFolder(`collection_covers/${originalCollection.folder}`, `collection_covers/${newFolderName}`);
+          const fileName = newCover.split('/').pop()!;
+          const urlResult = await api.getImageURL(`image/collection_covers/${newFolderName}/${fileName}`);
+          if (urlResult.success && urlResult.url) newCover = urlResult.url;
+        }
+
+        // Read fresh data (rename-folder already fixed paths in collections.json)
         const result = await api.readCollections();
         if (result.success) {
-          const updated = result.data.collections.map(c =>
-            c.id === originalCollection.id ? updatedCollection : c
-          );
+          const newFolderName = nameChanged ? sanitizeFolderName(title.trim()) : originalCollection.folder;
+          const updated = result.data.collections.map(c => {
+            if (c.id !== originalCollection.id) return c;
+            return {
+              ...c,
+              name: title.trim(),
+              cover: newCover,
+              coverPosition,
+              folder: newFolderName,
+            };
+          });
           await api.saveCollections({ collections: updated });
         }
       }
@@ -160,6 +169,11 @@ export default function EditCollection() {
               </div>
             </div>
           </div>
+          <div className="create-collection-footer">
+            <button type="submit" className="submit-btn" disabled={isSaving || !title.trim()}>
+              {isSaving ? '确定中...' : '确定'}
+            </button>
+          </div>
         </form>
 
         {isAdjustingCover && (
@@ -170,13 +184,6 @@ export default function EditCollection() {
             onCancel={() => setIsAdjustingCover(false)}
           />
         )}
-
-        <div className="create-collection-footer">
-          <button type="button" className="cancel-btn" onClick={() => navigate('/')}>取消</button>
-          <button type="submit" className="submit-btn" onClick={handleSubmit} disabled={isSaving || !title.trim()}>
-            {isSaving ? '保存中...' : '保存'}
-          </button>
-        </div>
       </div>
 
   );

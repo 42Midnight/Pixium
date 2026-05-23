@@ -179,6 +179,11 @@ export default function CreateCollection() {
               </div>
             </div>
           </div>
+          <div className="create-collection-footer">
+            <button type="submit" className="submit-btn" disabled={isSaving || !title.trim()}>
+              {isSaving ? '确定中...' : '确定'}
+            </button>
+          </div>
         </form>
 
         {isAdjustingCover && (
@@ -189,12 +194,6 @@ export default function CreateCollection() {
             onCancel={() => setIsAdjustingCover(false)}
           />
         )}
-
-        <div className="create-collection-footer">
-          <button type="submit" className="submit-btn" onClick={handleSubmit} disabled={isSaving || !title.trim()}>
-            {isSaving ? '创建中...' : '创建相册'}
-          </button>
-        </div>
       </div>
 
   );
