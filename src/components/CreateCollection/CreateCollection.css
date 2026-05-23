@@ -1,0 +1,339 @@
+/* 创建相册页面容器 */
+.create-collection-container {
+  min-height: 100vh;
+  background-color: #121212;
+  padding: 80px 20px 20px 20px;
+}
+
+/* 创建相册表单 */
+.create-collection-form {
+  display: flex;
+  justify-content: center;
+}
+
+/* 左侧：封面上传区域 */
+.create-collection-left {
+  width: 100%;
+  max-width: 500px;
+}
+
+/* 区域标题 */
+.section-title {
+  color: #fff;
+  font-size: 18px;
+  font-weight: 600;
+  margin: 0 0 16px 0;
+}
+
+/* 封面上传区域 */
+.cover-upload-section {
+  background-color: #1a1a1a;
+  border-radius: 12px;
+  padding: 24px;
+}
+
+/* 标题输入区域 */
+.title-input-section {
+  margin-bottom: 16px;
+}
+
+/* 模式选择区域 */
+.mode-select-section {
+  margin-bottom: 16px;
+}
+
+/* 模式选项容器 */
+.mode-options {
+  display: flex;
+  gap: 12px;
+}
+
+/* 单个模式选项 */
+.mode-option {
+  flex: 1;
+  display: flex;
+  align-items: flex-start;
+  padding: 16px;
+  background-color: #222;
+  border: 2px solid #333;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.mode-option:hover {
+  border-color: #555;
+}
+
+.mode-option.selected {
+  border-color: #4caf50;
+  background-color: #1a3a1a;
+}
+
+.mode-option input[type="radio"] {
+  display: none;
+}
+
+/* 模式内容 */
+.mode-content {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+/* 模式名称 */
+.mode-name {
+  color: #fff;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+/* 模式描述 */
+.mode-desc {
+  color: #888;
+  font-size: 13px;
+}
+
+/* 输入标签 */
+.input-label {
+  display: block;
+  color: #ccc;
+  font-size: 14px;
+  margin-bottom: 8px;
+}
+
+/* 标题输入框 */
+.title-input {
+  width: 100%;
+  padding: 12px 16px;
+  background-color: #222;
+  color: #fff;
+  border: 1px solid #333;
+  border-radius: 8px;
+  font-size: 15px;
+  transition: border-color 0.2s ease;
+  box-sizing: border-box;
+}
+
+.title-input:focus {
+  outline: none;
+  border-color: #555;
+}
+
+/* 封面上传区域 */
+.cover-upload-area {
+  margin-bottom: 24px;
+}
+
+/* 拖拽状态样式 */
+.cover-upload-area.dragging .upload-placeholder {
+  border-color: #4caf50;
+  background-color: #1a3a1a;
+}
+
+.cover-upload-area.dragging .upload-icon {
+  color: #4caf50;
+}
+
+.cover-upload-area.dragging .upload-text {
+  color: #4caf50;
+}
+
+/* 封面上传标签 */
+.cover-upload-label {
+  display: block;
+}
+
+/* 封面上传输入框 */
+.cover-upload-input {
+  display: none;
+}
+
+/* 上传占位符 */
+.upload-placeholder {
+  border: 2px dashed #444;
+  border-radius: 12px;
+  padding: 40px 20px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.upload-placeholder:hover {
+  border-color: #666;
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+/* 上传图标 */
+.upload-icon {
+  display: block;
+  font-size: 48px;
+  color: #666;
+  margin-bottom: 12px;
+}
+
+/* 上传文本 */
+.upload-text {
+  display: block;
+  color: #888;
+  font-size: 15px;
+  margin-bottom: 8px;
+}
+
+/* 上传提示 */
+.upload-hint {
+  display: block;
+  color: #666;
+  font-size: 13px;
+}
+
+/* 封面内容总包装器 */
+.cover-content-wrapper {
+  display: block;
+}
+
+/* 封面预览包装器 */
+.cover-preview-wrapper {
+  position: relative;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+/* 封面操作按钮包装器 */
+.cover-action-wrapper {
+  margin-top: 24px;
+}
+
+/* 封面预览图片 */
+.cover-preview {
+  width: 100%;
+  height: auto;
+  display: block;
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
+}
+
+/* 移除封面按钮 */
+.remove-cover-btn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 32px;
+  height: 32px;
+  background-color: rgba(0, 0, 0, 0.7);
+  color: #fff;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s ease;
+}
+
+.remove-cover-btn:hover {
+  background-color: rgba(0, 0, 0, 0.9);
+}
+
+/* 手动调整按钮 */
+.cover-adjust-btn {
+  background-color: #1976d2;
+  color: #fff;
+  border: none;
+  padding: 10px 24px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: background-color 0.2s ease;
+  display: block;
+  margin: 20px auto 0 auto;
+}
+
+.cover-adjust-btn:hover {
+  background-color: #1565c0;
+}
+
+/* 底部操作按钮区域 */
+.create-collection-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 30px;
+}
+
+/* 取消按钮 */
+.cancel-btn {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  border: none;
+  padding: 12px 28px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 15px;
+  font-weight: 500;
+  transition: background-color 0.2s ease;
+}
+
+.cancel-btn:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+/* 提交按钮 */
+.submit-btn {
+  background-color: #4caf50;
+  color: #fff;
+  border: none;
+  padding: 12px 28px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 15px;
+  font-weight: 500;
+  transition: background-color 0.2s ease;
+}
+
+.submit-btn:hover:not(:disabled) {
+  background-color: #43a047;
+}
+
+.submit-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* 响应式设置 */
+@media (max-width: 768px) {
+  .create-collection-form {
+    flex-direction: column;
+  }
+
+  .create-collection-header {
+    flex-wrap: wrap;
+  }
+
+  .create-collection-title {
+    font-size: 22px;
+  }
+
+  .cover-preview {
+    aspect-ratio: 16 / 9;
+  }
+}
+
+/* 恢复默认按钮 */
+.cover-modal-reset {
+  width: 100%;
+  background-color: rgba(255, 255, 255, 0.15);
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  padding: 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 16px;
+  margin-bottom: 10px;
+}
+
+.cover-modal-reset:hover {
+  background-color: rgba(255, 255, 255, 0.25);
+}

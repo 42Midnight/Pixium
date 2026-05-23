@@ -1,15 +1,15 @@
 {
-  "name": "comfyui-prompt-manager",
-  "productName": "ComfyUI Prompt Manager",
+  "name": "pixium",
+  "productName": "Pixium",
   "version": "1.0.0",
-  "main": "electron/main.js",
+  "main": "electron-dist/main.js",
   "type": "module",
-  "description": "ComfyUI Prompt 管理器，用于管理和组织 AI 绘画提示词",
+  "description": "Pixium",
   "repository": {
     "type": "git",
-    "url": "https://github.com/42Midnight/comfyui-prompt-manager.git"
+    "url": "https://github.com/42Midnight/Pixium.git"
   },
-  "homepage": "https://github.com/42Midnight/comfyui-prompt-manager",
+  "homepage": "https://github.com/42Midnight/Pixium",
   "author": {
     "name": "42Midnight",
     "email": "midnight42d@qq.com",
@@ -18,23 +18,28 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
+    "build:electron": "node -e \"try{require('fs').rmSync('electron-dist',{recursive:true})}catch(e){};require('fs').mkdirSync('electron-dist',{recursive:true})\" && tsc -p tsconfig.electron.json && node -e \"require('fs').cpSync('electron/preload.cjs','electron-dist/preload.cjs')\"",
     "lint": "eslint .",
     "preview": "vite preview",
-    "electron": "electron .",
-    "start": "concurrently --kill-others --success first \"vite\" \"electron .\"",
-    "dist": "vite build && electron-builder",
+    "electron": "npm run build:electron && electron .",
+    "start": "npm run build:electron && concurrently --kill-others --success first \"vite\" \"electron .\"",
+    "start:packaged": "npm run build:electron && concurrently --kill-others --success first \"vite\" \"cross-env FORCE_PACKAGED_MODE=true electron .\"",
+    "dist": "npm run build:electron && vite build && electron-builder",
     "pack": "electron-builder --dir",
     "dist:win": "electron-builder --win",
     "dist:mac": "electron-builder --mac"
   },
   "build": {
-    "appId": "io.github.42Midnight.comfyui-prompt-manager",
+    "appId": "io.github.42Midnight.Pixium",
     "mac": {
       "category": "public.app-category.productivity",
       "target": [
         {
           "target": "dmg",
-          "arch": ["x64", "arm64"]
+          "arch": [
+            "x64",
+            "arm64"
+          ]
         }
       ],
       "icon": "build/icon.icns",
@@ -44,7 +49,9 @@
       "target": [
         {
           "target": "nsis",
-          "arch": ["x64"]
+          "arch": [
+            "x64"
+          ]
         }
       ],
       "icon": "build/icon.ico",
@@ -56,7 +63,7 @@
       "allowToChangeInstallationDirectory": true,
       "createDesktopShortcut": true,
       "createStartMenuShortcut": true,
-      "shortcutName": "ComfyUI Prompt Manager"
+      "shortcutName": "Pixium"
     },
     "directories": {
       "output": "release"
@@ -71,21 +78,26 @@
     "@babel/core": "^7.29.0",
     "@eslint/js": "^9.39.4",
     "@rolldown/plugin-babel": "^0.2.1",
+    "@types/node": "^25.9.1",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^6.0.1",
     "babel-plugin-react-compiler": "^1.0.0",
     "concurrently": "^9.2.1",
+    "cross-env": "^10.1.0",
     "electron": "^41.1.1",
     "electron-builder": "^26.8.1",
     "eslint": "^9.39.4",
     "eslint-plugin-react-hooks": "^7.0.1",
     "eslint-plugin-react-refresh": "^0.5.2",
     "globals": "^17.4.0",
+    "ts-node": "^10.9.2",
+    "tsx": "^4.22.3",
+    "typescript": "^6.0.3",
     "vite": "^8.0.1"
   },
   "bugs": {
-    "url": "https://github.com/42Midnight/comfyui-prompt-manager/issues"
+    "url": "https://github.com/42Midnight/Pixium/issues"
   },
   "keywords": [
     "comfyui",

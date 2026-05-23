@@ -6,6 +6,7 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
+debug.log
 
 # Dependencies
 node_modules
@@ -13,6 +14,7 @@ node_modules
 # Build output
 dist
 dist-ssr
+electron-dist
 release
 *.local
 
@@ -43,3 +45,9 @@ Thumbs.db
 # User data (not tracked)
 data/
 image/
+
+# Claude Code
+.claude/
+
+# Vite
+.vite/

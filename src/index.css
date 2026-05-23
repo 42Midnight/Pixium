@@ -1,6 +1,7 @@
 html,
 body {
-  background-color: #1f1f1f; /* 你想要的颜色 */
-  margin: 0; /* 去掉默认边距，避免白边 */
+  background-color: #121212;
+  margin: 0;
   padding: 0;
+  min-height: 100vh;
 }

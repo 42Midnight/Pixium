@@ -1,203 +1,246 @@
-# ComfyUI Prompt Manager
+# Pixium
 
-## 项目简介
-ComfyUI Prompt Manager 是一个基于 React + Electron 开发的本地桌面应用，用于管理和组织ComfyUI等AI生成的图片作品及其对应的提示词信息。方便学习和管理提示词。
-虽然该项目一开始为ComfyUI的使用场景而设计，但该项目的使用场景不局限于管理ComfyUI相关的提示词，实际上可以作为通用的提示词管理工具。
+A local-first Electron desktop app for managing AI-generated artworks and their prompts. Browse your creations in a beautiful waterfall layout, organize them into collections, and never lose a prompt again.
 
-## 使用平台说明
-目前本仓库只提供Windows操作系统的安装包。想要在其他操作系统上使用，可以自己配置打包到其他操作系统。
+> 中文文档请见 [README_CN.md](./README_CN.md)
 
-## 功能特性
-- 🖼️ **瀑布流展示**：响应式瀑布流布局，根据屏幕宽度自动调整列数
-- 📁 **文件管理**：支持图片上传、批量选择和删除
-- 📝 **Prompt 配置**：为每个作品添加和管理多个 Prompt 字段
-- 📋 **复制功能**：支持复制单个 Prompt 字段或全部字段
-- 💾 **本地存储**：所有数据存储在本地文件系统，无需网络连接
-- 📱 **响应式设计**：适配不同屏幕尺寸
-
-## 技术栈
-- **前端框架**：React 19.2.4
-- **构建工具**：Vite 8.0.1
-- **桌面应用**：Electron 41.1.1
-- **路由管理**：React Router 7.14.0
-- **样式**：CSS3
-
-## 安装和运行
-
-### 发布页下载链接
-
-[Windows](https://github.com/42Midnight/comfyui-prompt-manager/releases/latest)
-
-### 安装依赖
-```bash
-npm install
-```
-
-### 开发模式
-```bash
-npm run start
-```
-这将同时启动 Vite 开发服务器和 Electron 应用。
-
-### 构建生产版本
-```bash
-npm run build
-```
-
-### 打包桌面应用
-```bash
-npm run dist:win
-```
-这将生成 Windows 平台的可执行文件。
-
-## 项目结构
-```
-comfyui-prompt-manager/
-├── electron/            # Electron 主进程和预加载脚本
-│   ├── main.js          # 主进程文件，处理窗口创建和 IPC 通信
-│   └── preload.js       # 预加载脚本，暴露 IPC 接口
-├── src/                 # React 源代码
-│   ├── components/      # 组件
-│   │   ├── Detail/      # 图片详情页
-│   │   ├── Upload/      # 上传页面
-│   │   └── WaterFall/   # 瀑布流首页
-│   ├── App.jsx          # 应用主组件
-│   └── index.css        # 全局样式
-├── image/               # 图片存储目录
-├── data/                # JSON 数据存储目录
-├── package.json         # 项目配置
-└── README.md            # 项目说明
-```
-
-## 使用说明
-
-### 上传作品
-1. 点击顶部导航栏的「添加作品」按钮
-2. 点击或拖拽图片到上传区域
-3. 输入作品标题（可选，默认为文件名）
-4. 添加和配置 Prompt 字段
-5. 点击「确定」按钮保存
-
-### 浏览作品
-- 在首页浏览瀑布流展示的作品
-- 点击作品卡片进入详情页
-- 支持批量选择和删除作品
-
-### 查看详情
-- 在详情页查看完整图片和标题
-- 浏览和复制 Prompt 信息
-- 支持删除作品
-
-## 数据存储
-- 图片文件存储在 `image/` 目录
-- JSON 数据存储在 `data/` 目录
-- 打包后，数据存储在应用根目录的对应文件夹
-
-## 注意事项
-- 请确保有足够的存储空间来保存图片
-- 支持的图片格式：JPG、PNG、JPEG
-- 打包后的应用会在首次运行时自动创建必要的目录结构
-
----
-
-# ComfyUI Prompt Manager
-
-## Project Introduction
-ComfyUI Prompt Manager is a local desktop application built with React and Electron for managing and organizing AI-generated images and their corresponding prompts, especially for ComfyUI. It helps users efficiently study and manage prompt engineering workflows.
-Although designed for ComfyUI, it is not limited to that scenario and can be used as a universal prompt manager for various AI generation tools.
-
-## Platform Usage Instructions
-Currently, this repository only provides installation packages for the Windows operating system.
-If you wish to use it on other operating systems, you can configure and package it for those platforms yourself.
+![Electron](https://img.shields.io/badge/Electron-41-47848F?logo=electron)
+![React](https://img.shields.io/badge/React-19-61DAFB?logo=react)
+![TypeScript](https://img.shields.io/badge/TypeScript-6-3178C6?logo=typescript)
+![Vite](https://img.shields.io/badge/Vite-8-646CFF?logo=vite)
 
 ## Features
-- 🖼️ **Waterfall Layout**：Responsive waterfall layout that automatically adjusts the number of columns based on screen width
-- 📁 **File Management**：Support image upload, batch selection and deletion
-- 📝 **Prompt Configuration**：Add and manage multiple Prompt fields for each work
-- 📋 **Copy Function**：Support copying single Prompt field or all fields
-- 💾 **Local Storage**：All data is stored in the local file system, no network connection required
-- 📱 **Responsive Design**：Adapt to different screen sizes
 
-## Technology Stack
-- **Frontend Framework**：React 19.2.4
-- **Build Tool**：Vite 8.0.1
-- **Desktop Application**：Electron 41.1.1
-- **Routing Management**：React Router 7.14.0
-- **Styling**：CSS3
+- **Waterfall Browsing** — Responsive masonry layout with adaptive column count. Browse collections and works in a visually rich grid.
+- **Two Collection Modes** — *Pixiv mode* for images paired with structured prompt fields; *Album mode* for image-only collections.
+- **Structured Prompts** — Manage prompts as named key-value pairs (e.g., Positive / Negative / Parameters). Copy individual fields, multi-select, or copy all at once from the detail view.
+- **Prompt Templates** — Create reusable templates with preset field names to standardize your workflow when adding new works.
+- **Batch Operations** — Select multiple works or collections to move, copy, download, or delete in bulk.
+- **Favorites** — Star works you like and browse them in a dedicated view with configurable sort order.
+- **Search & Date Grouping** — Real-time search with suggestions. Optional date-based grouping for chronological browsing.
+- **Cover Adjustment** — Fine-tune cover image positioning for both collections and individual works.
+- **In-Place Editing** — Edit work title, images, and prompts after creation without re-uploading.
+- **Image Export** — Download individual works or entire collections to a folder of your choice, with "Save As" support.
+- **Local-First** — Everything is stored on your file system. No cloud, no account, no internet connection needed.
+- **Cross-Platform** — Windows (NSIS installer) and macOS (DMG). Custom frameless window with integrated title bar controls.
 
-## Installation and Running
+## Tech Stack
 
-
-### Download from Releases
-
-[Windows](https://github.com/42Midnight/comfyui-prompt-manager/releases/latest)
-
-### Install Dependencies
-```bash
-npm install
-```
-
-### Development Mode
-```bash
-npm run start
-```
-This will start both the Vite development server and the Electron application.
-
-### Build Production Version
-```bash
-npm run build
-```
-
-### Package Desktop Application
-```bash
-npm run dist:win
-```
-This will generate an executable file for the Windows platform.
+| Layer | Technology |
+|-------|-----------|
+| Desktop Shell | Electron 41 |
+| UI Framework | React 19 + React Router v7 |
+| Language | TypeScript 6 |
+| Bundler | Vite 8 |
+| Compiler | React Compiler (babel-plugin-react-compiler) |
+| IPC | contextBridge + ipcRenderer / ipcMain |
+| Packaging | electron-builder |
 
 ## Project Structure
+
 ```
-comfyui-prompt-manager/
-├── electron/            # Electron main process and preload scripts
-│   ├── main.js          # Main process file, handling window creation and IPC communication
-│   └── preload.js       # Preload script, exposing IPC interfaces
-├── src/                 # React source code
-│   ├── components/      # Components
-│   │   ├── Detail/      # Image detail page
-│   │   ├── Upload/      # Upload page
-│   │   └── WaterFall/   # Waterfall homepage
-│   ├── App.jsx          # Application main component
-│   └── index.css        # Global styles
-├── image/               # Image storage directory
-├── data/                # JSON data storage directory
-├── package.json         # Project configuration
-└── README.md            # Project description
+pixium/
+├── electron/                  # Electron main process (TypeScript)
+│   ├── main.ts                # App entry, window creation, custom protocol
+│   ├── preload.cjs            # Context bridge exposing IPC to renderer
+│   ├── context.ts             # Shared utilities (paths, image URLs, dirs)
+│   └── ipc/                   # IPC request handlers
+│       ├── index.ts           # Handler registration
+│       ├── collections.ts     # Collection CRUD
+│       ├── works.ts           # Work scanning & file watching
+│       ├── images.ts          # Image save / delete / download
+│       ├── templates.ts       # Template persistence
+│       └── settings.ts        # Settings persistence
+├── src/                       # Renderer process (React)
+│   ├── main.tsx               # React DOM entry
+│   ├── App.tsx                # Route definitions
+│   ├── components/
+│   │   ├── WaterFall/         # Home — masonry grid, search, batch bar
+│   │   │   ├── Waterfall.tsx  # Main layout & logic
+│   │   │   ├── CollectionCard.tsx
+│   │   │   └── WorkCard.tsx
+│   │   ├── Detail/            # Work detail page
+│   │   │   ├── Detail.tsx     # Layout, copy controls, edit/delete
+│   │   │   ├── ImageViewer.tsx # Full-size image with zoom & navigation
+│   │   │   └── PromptCard.tsx  # Single prompt field display
+│   │   ├── Upload/            # Create / edit works
+│   │   │   ├── Upload.tsx     # Form, drag-drop, batch import, cover adjust
+│   │   │   ├── ImagePreview.tsx
+│   │   │   └── PromptEditor.tsx
+│   │   ├── CreateCollection/  # New collection form
+│   │   ├── EditCollection/    # Edit collection form
+│   │   ├── Settings/          # General settings & template manager
+│   │   │   ├── Settings.tsx
+│   │   │   └── TemplateManager.tsx
+│   │   ├── Favorites/         # Favorited works grid
+│   │   └── common/            # Shared components
+│   │       ├── TitleBar.tsx   # Custom frameless title bar
+│   │       ├── ConfirmDialog.tsx
+│   │       ├── ContextMenu.tsx
+│   │       └── CoverAdjustModal.tsx
+│   ├── hooks/                 # Custom React hooks
+│   │   ├── useCollections.ts
+│   │   ├── useWorks.ts
+│   │   ├── useFavorites.ts
+│   │   ├── useSettings.ts
+│   │   └── useTemplates.ts
+│   ├── services/
+│   │   └── electron.ts        # ElectronAPI wrapper helpers
+│   ├── types/                 # TypeScript interfaces
+│   │   ├── index.ts
+│   │   ├── work.ts
+│   │   ├── collection.ts
+│   │   ├── template.ts
+│   │   ├── settings.ts
+│   │   └── electron.d.ts
+│   └── utils/                 # Formatting & file helpers
+│       ├── format.ts
+│       ├── file.ts
+│       └── path.ts
+├── dist/                      # Vite build output
+├── electron-dist/             # Compiled Electron main process
+├── package.json
+├── vite.config.ts
+├── tsconfig.json
+├── tsconfig.electron.json
+├── tsconfig.node.json
+└── eslint.config.js
 ```
 
-## Usage Instructions
+## Getting Started
 
-### Upload Works
-1. Click the "Add Work" button in the top navigation bar
-2. Click or drag images to the upload area
-3. Enter the work title (optional, defaults to filename)
-4. Add and configure Prompt fields
-5. Click the "Confirm" button to save
+### Prerequisites
 
-### Browse Works
-- Browse works displayed in waterfall layout on the homepage
-- Click on work cards to enter the detail page
-- Support batch selection and deletion of works
+- Node.js 18+
+- npm
 
-### View Details
-- View the complete image and title on the detail page
-- Browse and copy Prompt information
-- Support deleting works
+### Development
+
+```bash
+# Install dependencies
+npm install
+
+# Launch dev server + Electron with hot reload
+npm start
+
+# Lint
+npm run lint
+```
+
+`npm start` runs Vite at `localhost:5173` and opens an Electron window pointing at it. Changes to renderer code are reflected instantly (HMR); changes to Electron main process require re-running `npm start`.
+
+### Build
+
+```bash
+# Build for the current platform
+npm run dist
+
+# Build Windows installer (NSIS)
+npm run dist:win
+
+# Build macOS disk image (DMG)
+npm run dist:mac
+```
+
+Output: `release/` directory.
+
+### Test Packaged Behavior Locally
+
+```bash
+npm run start:packaged
+```
+
+This simulates production mode: loads from `dist/index.html`, uses the `pixium://` custom protocol for images, and stores data in `app.getPath('userData')`.
+
+## Usage
+
+### 1. Create a Collection
+Click **+ New Collection** on the home page. Choose between:
+- **Pixiv Mode** — works contain both images and structured prompt fields.
+- **Album Mode** — image-only works, no prompt panel.
+
+### 2. Add Works
+Inside a collection, click **+ Add Work**. You can:
+- Drag & drop or click to select images.
+- Reorder images by dragging them within the preview area.
+- Choose "Merge into one work" (all images belong to one entry) or "Batch import" (each image becomes its own work).
+- Fill in prompt fields (Pixiv mode only). Pick a template from the dropdown to pre-fill field names.
+- Adjust the cover crop with the manual adjustment tool.
+- Set the title (optional; defaults to filename).
+
+### 3. Browse & Search
+The waterfall layout auto-arranges cards based on window width. Use the search bar to filter by name/title, with real-time suggestions. Enable **date grouping** in Settings to see works organized by creation date.
+
+### 4. View Details
+Click any work to see:
+- Full-size images with zoom (scroll wheel or pinch) and drag-to-pan.
+- All prompt fields — click to copy, use **Multi-Select** to pick specific fields, or **Copy All**.
+- Quick actions: favorite, edit, download, save-as, delete.
+
+### 5. Batch Operations
+Click **Batch Select** to enter batch mode:
+- Select items, or click a date header to select an entire group.
+- Move or copy works between collections.
+- Download selected works/collections to a configured path or a chosen folder.
+- Delete multiple items at once.
+
+### 6. Templates
+Go to **Settings → Upload Templates** to create and manage prompt field templates. Templates save you from re-typing field names (e.g., "Positive", "Negative", "Seed", "Steps") for every new work.
+
+### 7. Favorites
+Click the heart icon on any work card or in the detail view. Browse all favorites from the **Favorites** page, accessible from the home page action bar.
+
+## Settings
+
+| Setting | Description |
+|---------|-------------|
+| Collection add position | New collections appear at the front or back |
+| Work sort order | Ascending or descending by creation date |
+| Show image filename | Toggle filename overlay in the image viewer |
+| Show date grouping | Group works by date in collection view |
+| Favorites sort order | Newest or oldest favorites first |
+| Download path | Default folder for quick downloads |
 
 ## Data Storage
-- Image files are stored in the `image/` directory
-- JSON data is stored in the `data/` directory
-- After packaging, data is stored in the corresponding folders in the application root directory
 
-## Notes
-- Please ensure sufficient storage space to save images
-- Supported image formats: JPG, PNG, JPEG
-- The packaged application will automatically create the necessary directory structure when first run
+All data lives on your local file system.
+
+**Development** (`npm start`): stored under the project root.
+
+**Packaged**: stored in the OS-standard app data directory (e.g., `%APPDATA%/Pixium/` on Windows).
+
+```
+{data_root}/
+├── image/
+│   ├── {collection_folder}/
+│   │   ├── {work_folder}/
+│   │   │   ├── image1.png
+│   │   │   ├── image2.png
+│   │   │   └── info.json        # Title, prompts, cover, creation date
+│   │   └── ...
+│   └── collection_covers/
+│       └── {collection_folder}/
+│           └── cover.jpg
+└── data/
+    ├── collections.json
+    ├── templates.json
+    ├── settings.json
+    └── favorites.json
+```
+
+## Platform Support
+
+| Platform | Status |
+|----------|--------|
+| Windows (x64) | NSIS installer |
+| macOS (x64 / arm64) | DMG |
+
+Linux is not yet pre-configured but can be added in `package.json` → `build`.
+
+## Author
+
+[42Midnight](https://github.com/42Midnight)
+
+## License
+
+MIT

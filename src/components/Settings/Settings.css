@@ -5,42 +5,7 @@
   background-color: #1a1a1a;
   color: #ffffff;
   font-family: Arial, sans-serif;
-}
-
-/* 导航栏样式 */
-.settings-navbar {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 16px 24px;
-  background-color: #2d2d2d;
-  border-bottom: 1px solid #3d3d3d;
-}
-
-.navbar-brand {
-  font-size: 20px;
-  font-weight: bold;
-  color: #007acc;
-}
-
-.navbar-actions {
-  display: flex;
-  gap: 12px;
-}
-
-.navbar-back-btn {
-  background-color: rgba(255, 255, 255, 0.1);
-  color: #ffffff;
-  border: none;
-  padding: 8px 16px;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 14px;
-  transition: background-color 0.2s;
-}
-
-.navbar-back-btn:hover {
-  background-color: rgba(255, 255, 255, 0.2);
+  padding-top: 60px;
 }
 
 /* 设置容器样式 */
@@ -131,6 +96,96 @@
   line-height: 1.5;
 }
 
+/* 设置项样式 */
+.setting-item {
+  margin-bottom: 20px;
+}
+
+.setting-item-row {
+  display: flex;
+  gap: 40px;
+}
+
+.setting-label {
+  display: block;
+  font-size: 14px;
+  font-weight: 500;
+  color: #ffffff;
+  margin-bottom: 12px;
+}
+
+.setting-options {
+  display: flex;
+  gap: 20px;
+}
+
+.setting-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  background-color: #3d3d3d;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-size: 14px;
+  color: #b0b0b0;
+}
+
+.setting-option:hover {
+  background-color: #4d4d4d;
+}
+
+.setting-option.selected {
+  background-color: #007acc;
+  color: #ffffff;
+}
+
+.setting-option input[type="radio"] {
+  display: none;
+}
+
+/* 下载路径设置样式 */
+.download-path-item {
+  margin-top: 24px;
+  padding-top: 24px;
+  border-top: 1px solid #3d3d3d;
+}
+
+.download-path-container {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.download-path-input {
+  flex: 1;
+  max-width: 400px;
+  padding: 10px 12px;
+  background-color: #1a1a1a;
+  border: 1px solid #3d3d3d;
+  border-radius: 6px;
+  color: #ffffff;
+  font-size: 14px;
+  cursor: not-allowed;
+}
+
+.browse-button {
+  background-color: #007acc;
+  color: #ffffff;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: background-color 0.2s;
+}
+
+.browse-button:hover {
+  background-color: #0069a0;
+}
+
 /* 上传模板样式 */
 .upload-template-container {
   display: flex;
@@ -195,22 +250,24 @@
 
 /* 模板编辑样式 */
 .template-edit-container {
+  flex: 1;
   display: flex;
   align-items: center;
   gap: 8px;
-  width: 100%;
+  min-width: 0;
 }
 
 .template-edit-input {
-  flex: 1;
+  width: 100%;
   padding: 3px 6px;
   background-color: #1a1a1a;
   border: 1px solid #3d3d3d;
   border-radius: 4px;
   color: #ffffff;
   font-size: 13px;
-  max-width: 100px;
+  max-width: 150px;
   outline: none;
+  box-sizing: border-box;
 }
 
 
@@ -259,7 +316,7 @@
 }
 
 .template-item {
-  padding: 12px 16px;
+  padding: 16px 16px;
   cursor: pointer;
   transition: all 0.2s;
   font-size: 14px;
@@ -267,9 +324,9 @@
   color: #b0b0b0;
   display: flex;
   align-items: center;
-  gap: 10px;
-  margin: 0 12px 8px 12px;
-  border-radius: 8px;
+  gap: 12px;
+  margin: 0 8px 10px 8px;
+  border-radius: 10px;
 }
 
 .template-item:hover {
@@ -299,8 +356,15 @@
   position: relative;
   background-color: #2d2d2d;
   border-radius: 8px;
-  padding: 20px;
+  padding: 16px;
   border: 1px solid #3d3d3d;
+}
+
+.field-name-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
 }
 
 .field-name-input,
@@ -312,6 +376,14 @@
   border-radius: 6px;
   color: #ffffff;
   font-size: 14px;
+  box-sizing: border-box;
+}
+
+.field-name-input {
+  height: 36px;
+}
+
+.field-value-input {
   margin-bottom: 12px;
 }
 
@@ -321,26 +393,31 @@
 }
 
 .delete-field-btn {
-  position: absolute;
-  top: 12px;
-  right: 12px;
-  background-color: #f44336;
+  background-color: #e53935;
   color: #ffffff;
-  border: none;
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
+  border: 1px solid #c62828;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border-radius: 6px;
   cursor: pointer;
-  font-size: 14px;
+  font-size: 18px;
   font-weight: bold;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: background-color 0.2s;
+  transition: all 0.2s;
+  flex-shrink: 0;
+  box-sizing: border-box;
 }
 
 .delete-field-btn:hover {
   background-color: #d32f2f;
+  transform: scale(1.05);
+}
+
+.delete-field-btn span {
+  margin-top: -1px;
 }
 
 .add-field-btn {

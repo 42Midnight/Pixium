@@ -16,17 +16,49 @@
   font-size: 18px;
 }
 
-/* 顶部导航栏 */
-.detail-navbar {
+/* Fixed header: subbar */
+.detail-header-fixed {
+  position: fixed;
+  top: 60px;
+  left: 0;
+  right: 0;
+  z-index: 99;
+  background-color: rgb(31, 31, 31);
+  border-bottom: none;
+}
+
+/* 次行操作栏 (inside fixed header) */
+.detail-subbar {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  background-color: #1a1a1a;
-  padding: 16px 30px;
-  border-bottom: 1px solid #333;
-  position: sticky;
-  top: 0;
-  z-index: 100;
+  justify-content: flex-end;
+  gap: 12px;
+  background-color: rgb(31, 31, 31);
+  padding: 0 24px;
+  height: 60px;
+  border-bottom: none;
+}
+.detail-subbar button {
+  background: rgba(255,255,255,0.1);
+  color: #fff;
+  border: none;
+  padding: 6px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background 0.2s;
+}
+.detail-subbar button:hover { background: rgba(255,255,255,0.2); }
+
+.detail-fav-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 8px !important;
+}
+
+.detail-fav-btn.favorited:hover {
+  background: rgba(255, 64, 129, 0.2) !important;
 }
 
 /* 返回按钮 */
@@ -125,7 +157,7 @@
   gap: 30px;
   max-width: 1600px;
   margin: 0 auto;
-  padding: 30px;
+  padding: 140px 30px 30px 30px;
 }
 
 /* 左侧：图片展示区域 */
@@ -201,6 +233,56 @@
   display: block;
 }
 
+/* 图片信息区域 */
+.detail-info {
+  display: flex;
+  gap: 20px;
+  justify-content: center;
+}
+
+/* 另存为按钮 */
+.saveas-button {
+  background-color: #4caf50;
+  color: #fff;
+  border: none;
+  padding: 10px 24px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: background-color 0.2s ease;
+  min-width: 100px;
+  text-align: center;
+}
+
+.saveas-button:hover {
+  background-color: #388e3c;
+}
+
+/* 下载按钮 */
+.download-button {
+  background-color: #2196f3;
+  color: #fff;
+  border: none;
+  padding: 10px 24px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: background-color 0.2s ease;
+  min-width: 100px;
+  text-align: center;
+}
+
+.download-button:hover:not(:disabled) {
+  background-color: #1976d2;
+}
+
+.download-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
 /* 删除按钮 */
 .delete-button {
   background-color: #f44336;
@@ -212,6 +294,8 @@
   font-size: 14px;
   font-weight: 500;
   transition: background-color 0.2s ease;
+  min-width: 100px;
+  text-align: center;
 }
 
 .delete-button:hover {
@@ -448,11 +532,6 @@
     max-height: 50vh;
   }
   
-  /* 导航栏在小屏幕上的调整 */
-  .detail-navbar {
-    padding: 12px 20px;
-  }
-  
   .navbar-title {
     font-size: 16px;
   }
@@ -479,12 +558,6 @@
     padding: 20px;
   }
   
-  .detail-navbar {
-    flex-direction: column;
-    gap: 10px;
-    align-items: flex-start;
-  }
-  
   .navbar-title {
     text-align: left;
     margin: 0;
@@ -494,4 +567,76 @@
     width: 100%;
     justify-content: space-between;
   }
+}
+
+/* 图片容器 */
+.image-container {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: zoom-in;
+  overflow: hidden;
+}
+
+.image-container:hover {
+  cursor: zoom-in;
+}
+
+/* 右键菜单样式 */
+.context-menu {
+  position: fixed;
+  background-color: #2a2a2a;
+  border-radius: 8px;
+  padding: 8px 0;
+  min-width: 160px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+  border: 1px solid #333;
+}
+
+.context-menu-item {
+  padding: 10px 20px;
+  color: #fff;
+  cursor: pointer;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+}
+
+.context-menu-item:hover {
+  background-color: #3a3a3a;
+}
+
+/* 全屏图片查看器样式 */
+.image-zoom-overlay {
+  position: fixed;
+  top: 60px;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 1);
+  z-index: 2000;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: zoom-out;
+}
+
+.image-zoom-container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  cursor: zoom-out;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.image-zoom-content {
+  max-width: 100%;
+  max-height: calc(100vh - 60px);
+  object-fit: contain;
+  cursor: zoom-out;
 }
