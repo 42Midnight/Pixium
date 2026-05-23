@@ -1,3 +1,4 @@
+import { memo, useRef, useState, useEffect } from 'react';
 import type { WorkData } from '../../types';
 
 interface WorkCardProps {
@@ -12,7 +13,7 @@ interface WorkCardProps {
   onToggleFavorite?: (e: React.MouseEvent, work: WorkData) => void;
 }
 
-export default function WorkCard({
+export default memo(function WorkCard({
   work, position, isSelected, isBatchMode, useAbsolutePosition = true,
   onClick, onContextMenu,
   isFavorite = false,
@@ -22,8 +23,30 @@ export default function WorkCard({
     ? (work.coverPositionVertical ? `50% ${work.coverPosition}%` : `${work.coverPosition}% 50%`)
     : 'center';
 
+  const maskId = `gap-mask-${work.id.replace(/[^a-zA-Z0-9]/g, '_')}`;
+
+  const cardRef = useRef<HTMLDivElement>(null);
+  const [isVisible, setIsVisible] = useState(false);
+
+  useEffect(() => {
+    const el = cardRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true);
+          observer.disconnect();
+        }
+      },
+      { rootMargin: '300px' },
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
   return (
     <div
+      ref={cardRef}
       className={`work-card ${isBatchMode ? 'batch-mode' : ''} ${isSelected ? 'selected' : ''}`}
       style={useAbsolutePosition && position ? { left: position.left, top: position.top, width: position.width } : undefined}
       onClick={e => onClick(e, work)}
@@ -41,12 +64,12 @@ export default function WorkCard({
           <div className="image-count">
             <svg width="12" height="12" viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg">
               <defs>
-                <mask id="gap-mask">
+                <mask id={maskId}>
                   <rect width="100%" height="100%" fill="white"/>
                   <rect x="24" y="24" width="162" height="162" rx="42" fill="black"/>
                 </mask>
               </defs>
-              <rect x="86" y="86" width="130" height="130" rx="26" fill="currentColor" mask="url(#gap-mask)"/>
+              <rect x="86" y="86" width="130" height="130" rx="26" fill="currentColor" mask={`url(#${maskId})`}/>
               <rect x="40" y="40" width="130" height="130" rx="26" fill="currentColor"/>
             </svg>
 
@@ -65,11 +88,14 @@ export default function WorkCard({
             <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
           </svg>
         </button>
-        <div className="cover-image-container" style={{ backgroundImage: `url(${work.cover})`, backgroundSize: 'cover', backgroundPosition }} />
+        <div
+          className="cover-image-container"
+          style={isVisible ? { backgroundImage: `url(${work.cover})`, backgroundSize: 'cover', backgroundPosition } : undefined}
+        />
       </div>
       <div className="work-info">
         <p className="work-title">{work.title}</p>
       </div>
     </div>
   );
-}
+});

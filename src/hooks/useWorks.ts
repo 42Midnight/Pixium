@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useMemo, useRef } from 'react';
 import type { WorkData, Collection } from '../types';
 import { isElectronAvailable } from '../services/electron';
 
@@ -37,11 +37,20 @@ export function useWorks() {
     }
   }, []);
 
+  const workMap = useMemo(() => {
+    const map = new Map<string, WorkData>();
+    for (const w of works) {
+      map.set(w.id, w);
+      if (w.folder && w.folder !== w.id) map.set(w.folder, w);
+    }
+    return map;
+  }, [works]);
+
   const getCollectionWorks = useCallback((collection: Collection): WorkData[] => {
     if (!collection.images?.length) return [];
 
     const collectionWorks = collection.images
-      .map(workId => works.find(w => w.id === workId || w.folder === workId))
+      .map(workId => workMap.get(workId))
       .filter((w): w is WorkData => w != null);
 
     let sortOrder = 'desc';
@@ -57,23 +66,28 @@ export function useWorks() {
       const timeB = b.createdAt?.timestamp || b.timestamp || 0;
       return sortOrder === 'asc' ? timeA - timeB : timeB - timeA;
     });
-  }, [works]);
+  }, [workMap]);
 
   useEffect(() => {
     loadWorks();
   }, [loadWorks]);
 
   // Watch for file changes
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   useEffect(() => {
     if (!isElectronAvailable()) return;
 
     window.electronAPI!.startWatchWorks();
     const removeListener = window.electronAPI!.onWorksChanged(() => {
-      loadWorks();
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+      debounceRef.current = setTimeout(() => {
+        loadWorks();
+      }, 300);
     });
 
     return () => {
       removeListener?.();
+      if (debounceRef.current) clearTimeout(debounceRef.current);
     };
   }, [loadWorks]);
 

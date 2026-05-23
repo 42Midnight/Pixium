@@ -271,16 +271,20 @@ export function registerCollectionHandlers(): void {
       fs.renameSync(workFolderPath, targetWorkPath);
 
       // Update info.json in new location
+      const newFolder = `${targetFolderName}/${workBaseName}`;
       const targetInfoPath = path.join(targetWorkPath, 'info.json');
       if (workInfo && fs.existsSync(targetInfoPath)) {
         const info = JSON.parse(fs.readFileSync(targetInfoPath, 'utf-8'));
-        info.folder = `${targetFolderName}/${workBaseName}`;
+        info.folder = newFolder;
         info.collectionId = targetCollection.id;
+        if (info.images?.length > 0) {
+          info.cover = getImageURL(`image/${newFolder}/${info.images[0]}`);
+        }
         fs.writeFileSync(targetInfoPath, JSON.stringify(info, null, 2), 'utf-8');
       }
 
       // Update collections.json
-      const newWorkId = `${targetFolderName}/${workBaseName}`;
+      const newWorkId = newFolder;
       for (const c of data.collections) {
         if (c.id === currentCollection.id) {
           c.images = (c.images || []).filter((img: string) => img !== workId && img.split('/').pop() !== workBaseName);
@@ -350,15 +354,19 @@ export function registerCollectionHandlers(): void {
 
       fs.cpSync(workFolderPath, targetWorkPath, { recursive: true });
 
+      const newFolder = `${targetFolderName}/${workBaseName}`;
       const targetInfoPath = path.join(targetWorkPath, 'info.json');
       if (fs.existsSync(targetInfoPath)) {
         const info = JSON.parse(fs.readFileSync(targetInfoPath, 'utf-8'));
-        info.folder = `${targetFolderName}/${workBaseName}`;
+        info.folder = newFolder;
         info.collectionId = targetCollection.id;
+        if (info.images?.length > 0) {
+          info.cover = getImageURL(`image/${newFolder}/${info.images[0]}`);
+        }
         fs.writeFileSync(targetInfoPath, JSON.stringify(info, null, 2), 'utf-8');
       }
 
-      const newWorkId = `${targetFolderName}/${workBaseName}`;
+      const newWorkId = newFolder;
       for (const c of data.collections) {
         if (c.id === targetCollection.id) {
           if (!c.images.some((img: string) => img === newWorkId || img.split('/').pop() === workBaseName)) {

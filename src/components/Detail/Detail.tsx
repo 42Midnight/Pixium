@@ -15,7 +15,7 @@ export default function Detail() {
   const navigate = useNavigate();
   const location = useLocation();
   const { settings } = useSettings();
-  const { isFavorite, toggleFavorite } = useFavorites();
+  const { isFavorite, toggleFavorite, removeFavorites } = useFavorites();
 
   const [workData, setWorkData] = useState<WorkData | null>(null);
   const [copiedField, setCopiedField] = useState<string | null>(null);
@@ -113,6 +113,7 @@ export default function Detail() {
           await window.electronAPI!.saveCollections({ collections: updated });
         }
       }
+      removeFavorites([workData.id, workData.folder].filter(Boolean) as string[]);
       goBack();
     } catch (error: any) {
       alert('删除失败：' + error.message);
@@ -120,7 +121,7 @@ export default function Detail() {
       setIsDeleting(false);
       setShowDeleteConfirm(false);
     }
-  }, [workData, goBack]);
+  }, [workData, goBack, removeFavorites]);
 
   const handleSaveAs = useCallback(async () => {
     if (!workData?.fileName || !isElectronAvailable()) return;

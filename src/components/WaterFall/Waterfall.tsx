@@ -20,6 +20,8 @@ interface CardPosition {
   width: string;
 }
 
+const savedScrollPositions: Record<string, number> = {};
+
 export default function WaterFall() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -28,13 +30,12 @@ export default function WaterFall() {
   const { collections, isLoading: collsLoading, setCollections, loadCollections, saveCollections } = useCollections();
   const { works, isLoading: worksLoading, loadWorks, getCollectionWorks } = useWorks();
   const { settings } = useSettings();
-  const { toggleFavorite, isFavorite } = useFavorites();
+  const { toggleFavorite, isFavorite, removeFavorites } = useFavorites();
   const isLoading = collsLoading || worksLoading;
 
-  // Scroll ref (used later by effects)
-  const scrollPositionsRef = useRef<Record<string, number>>({});
+  // Scroll positions survive component remount
   const saveScroll = useCallback(() => {
-    scrollPositionsRef.current[location.pathname] = window.scrollY;
+    savedScrollPositions[location.pathname] = window.scrollY;
   }, [location.pathname]);
 
   const activeCollection = useMemo(
@@ -55,7 +56,7 @@ export default function WaterFall() {
   useEffect(() => {
     if (Object.keys(cardPositions).length > 0 && !layoutReadyRef.current) {
       layoutReadyRef.current = true;
-      const restored = scrollPositionsRef.current[location.pathname] || 0;
+      const restored = savedScrollPositions[location.pathname] || 0;
       requestAnimationFrame(() => requestAnimationFrame(() => window.scrollTo(0, restored)));
     }
   }, [cardPositions, location.pathname]);
@@ -86,8 +87,7 @@ export default function WaterFall() {
   }, [draggingCollection, dragOverIndex, collections]);
 
   const loadAll = useCallback(async () => {
-    await loadCollections();
-    await loadWorks();
+    await Promise.all([loadCollections(), loadWorks()]);
   }, [loadCollections, loadWorks]);
 
   useEffect(() => { loadAll(); }, [loadAll]);
@@ -228,9 +228,17 @@ export default function WaterFall() {
     }
   }, [isAllSelected, activeCollection, collections, getCollectionWorks]);
 
+  const selectedWorkIds = useMemo(() => new Set(selectedWorks.map(s => s.id)), [selectedWorks]);
+
   const handleToggleFavorite = useCallback((_e: React.MouseEvent, work: WorkData) => {
     toggleFavorite(work.id);
   }, [toggleFavorite]);
+
+  const handleWorkContextMenu = useCallback((e: React.MouseEvent, work: WorkData) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setWorkContextMenu({ x: e.clientX, y: e.clientY, work });
+  }, []);
 
   // Batch delete
   const handleConfirmDelete = useCallback(async () => {
@@ -259,6 +267,7 @@ export default function WaterFall() {
         await saveCollections({ collections: updated });
         await loadAll();
       }
+      removeFavorites(selectedWorks.map(s => s.id));
       setShowDeleteConfirm(false);
       setIsBatchMode(false);
       setSelectedWorks([]);
@@ -267,39 +276,26 @@ export default function WaterFall() {
     } finally {
       setIsDeleting(false);
     }
-  }, [activeCollection, selectedWorks, collections, setCollections, saveCollections, loadAll]);
+  }, [activeCollection, selectedWorks, collections, setCollections, saveCollections, loadAll, removeFavorites]);
 
   // Move works (batch or single)
   const handleConfirmMove = useCallback(async (target: Collection) => {
     if (!activeCollection || !isElectronAvailable()) return;
     const api = window.electronAPI!;
-    let success = true;
-    const newIds: string[] = [];
     const worksToMove = singleWorkAction ? [singleWorkAction] : selectedWorks;
 
     for (const item of worksToMove) {
       const w = item as WorkData;
       const result = await api.moveWorkFolder(w.id, target.id);
-      if (!result.success) { alert('移动失败: ' + result.error); success = false; break; }
-      newIds.push(result.newWorkId || w.id);
+      if (!result.success) { alert('移动失败: ' + result.error); return; }
     }
 
-    if (!success) { setShowMoveConfirm(false); setSingleWorkAction(null); return; }
-
-    const ids = new Set(worksToMove.map(s => s.id));
-    const updated = collections.map(c => {
-      if (c.id === activeCollection.id) return { ...c, images: c.images.filter(img => !ids.has(img)) };
-      if (c.id === target.id) return { ...c, images: [...c.images, ...newIds] };
-      return c;
-    });
-
-    setCollections(updated);
-    await saveCollections({ collections: updated });
     setShowMoveConfirm(false);
     setSelectedWorks([]);
     setSingleWorkAction(null);
     setIsBatchMode(false);
-  }, [activeCollection, singleWorkAction, selectedWorks, collections, setCollections, saveCollections]);
+    await loadAll();
+  }, [activeCollection, singleWorkAction, selectedWorks, loadAll]);
 
   // Copy works (batch or single)
   const handleConfirmCopy = useCallback(async (target: Collection) => {
@@ -502,7 +498,7 @@ export default function WaterFall() {
               ? group.works.filter(w => w.title.toLowerCase().includes(submittedQuery.trim().toLowerCase()))
               : group.works;
             if (filteredWorks.length === 0) return null;
-            const isGroupSelected = filteredWorks.every(w => selectedWorks.some(s => s.id === w.id));
+            const isGroupSelected = filteredWorks.every(w => selectedWorkIds.has(w.id));
             return (
               <div key={group.dateStr} className="date-group">
                 <div className="date-header" onClick={() => {
@@ -515,9 +511,9 @@ export default function WaterFall() {
                 </div>
                 <div className="date-group-content">
                   {filteredWorks.map(work => (
-                    <WorkCard key={work.id} work={work} isSelected={selectedWorks.some(w => w.id === work.id)}
+                    <WorkCard key={work.id} work={work} isSelected={selectedWorkIds.has(work.id)}
                       isBatchMode={isBatchMode} useAbsolutePosition={false}
-                      onClick={handleCardClick} onContextMenu={(e, w) => { e.preventDefault(); e.stopPropagation(); setWorkContextMenu({ x: e.clientX, y: e.clientY, work: w }); }}
+                      onClick={handleCardClick} onContextMenu={handleWorkContextMenu}
                       isFavorite={isFavorite(work.id)} onToggleFavorite={handleToggleFavorite} />
                   ))}
                 </div>
@@ -530,10 +526,10 @@ export default function WaterFall() {
             return (
               <WorkCard key={work.id} work={work}
                 position={cardPositions[work.id] || { left: '0px', top: '0px', width: '16%' }}
-                isSelected={selectedWorks.some(w => w.id === work.id)}
+                isSelected={selectedWorkIds.has(work.id)}
                 isBatchMode={isBatchMode}
                 onClick={handleCardClick}
-                onContextMenu={(e, w) => { e.preventDefault(); e.stopPropagation(); setWorkContextMenu({ x: e.clientX, y: e.clientY, work: w }); }}
+                onContextMenu={handleWorkContextMenu}
                 isFavorite={isFavorite(work.id)} onToggleFavorite={handleToggleFavorite} />
             );
           })
@@ -617,7 +613,7 @@ export default function WaterFall() {
                 if (confirmAction === 'copy') handleConfirmCopy(selectedTargetCollection);
                 else handleConfirmMove(selectedTargetCollection);
               }}>确定</button>
-              <button className="delete-confirm-cancel" onClick={() => { setShowMoveConfirm(false); setConfirmAction(null); }}>取消</button>
+              <button className="delete-confirm-cancel" onClick={() => { setShowMoveConfirm(false); setConfirmAction(null); setSingleWorkAction(null); }}>取消</button>
             </div>
           </div>
         </div>
@@ -683,6 +679,7 @@ export default function WaterFall() {
             const w = workContextMenu.work;
             if (!confirm(`确定要删除作品"${w.title || w.id}"吗？`)) return;
             if (isElectronAvailable()) await window.electronAPI!.deleteFiles(w.id);
+            removeFavorites([w.id]);
             await loadAll();
           }, danger: true },
         ]} onClose={() => setWorkContextMenu(null)} />

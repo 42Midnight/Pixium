@@ -312,12 +312,14 @@ body {
   background-color: transparent;
   border-radius: 12px;
   overflow: hidden;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
   cursor: pointer;
+  content-visibility: auto;
+  contain-intrinsic-size: 300px 250px;
 }
 
 .work-card:hover:not(.batch-mode) {
   transform: translateY(-4px);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .work-card.batch-mode {

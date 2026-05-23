@@ -40,5 +40,9 @@ export function useFavorites() {
     return favorites.includes(workId);
   }, [favorites]);
 
-  return { favorites, toggleFavorite, isFavorite };
+  const removeFavorites = useCallback((workIds: string[]) => {
+    setFavorites(prev => prev.filter(id => !workIds.includes(id)));
+  }, []);
+
+  return { favorites, toggleFavorite, isFavorite, removeFavorites };
 }
