@@ -26,25 +26,10 @@
     "start:packaged": "npm run build:electron && concurrently --kill-others --success first \"vite\" \"cross-env FORCE_PACKAGED_MODE=true electron .\"",
     "dist": "npm run build:electron && vite build && electron-builder",
     "pack": "electron-builder --dir",
-    "dist:win": "electron-builder --win",
-    "dist:mac": "electron-builder --mac"
+    "dist:win": "electron-builder --win"
   },
   "build": {
     "appId": "io.github.42Midnight.Pixium",
-    "mac": {
-      "category": "public.app-category.productivity",
-      "target": [
-        {
-          "target": "dmg",
-          "arch": [
-            "x64",
-            "arm64"
-          ]
-        }
-      ],
-      "icon": "build/icon.icns",
-      "artifactName": "${productName}-${version}-${arch}.${ext}"
-    },
     "win": {
       "target": [
         {
