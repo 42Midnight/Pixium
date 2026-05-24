@@ -72,6 +72,14 @@ export default function CoverAdjustModal({
     };
   }, [isDragging, dimensions]);
 
+  useEffect(() => {
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onCancel();
+    };
+    document.addEventListener('keydown', handleKey);
+    return () => document.removeEventListener('keydown', handleKey);
+  }, [onCancel]);
+
   if (!imageUrl) return null;
 
   const bgPos = getCoverBackgroundPosition(position, dimensions);

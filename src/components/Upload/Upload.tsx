@@ -427,7 +427,7 @@ export default function Upload() {
             <div className="title-input-section">
               <label className="input-label">标题</label>
               <input type="text" value={title} onChange={e => setTitle(e.target.value)}
-                placeholder="请输入标题（可选，默认为文件名）" className="title-input" />
+                placeholder="请输入标题（可选，默认为文件名）" className="title-input" spellCheck={false} />
             </div>
           )}
 

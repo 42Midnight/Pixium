@@ -598,8 +598,8 @@ export default function WaterFall() {
       )}
 
       {showMoveConfirm && (
-        <div className="delete-confirm-overlay">
-          <div className="delete-confirm-dialog">
+        <div className="delete-confirm-overlay" onClick={() => { setShowMoveConfirm(false); setConfirmAction(null); setSingleWorkAction(null); }}>
+          <div className="delete-confirm-dialog" onClick={e => e.stopPropagation()} onKeyDown={e => { if (e.key === 'Escape') { setShowMoveConfirm(false); setConfirmAction(null); setSingleWorkAction(null); } }}>
             <h3 className="delete-confirm-title">{confirmAction === 'copy' ? '复制到...' : '移动到...'}</h3>
             <p className="delete-confirm-message">请选择目标相册：</p>
             <div className="move-collection-list">

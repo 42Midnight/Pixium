@@ -18,27 +18,28 @@ export default function ContextMenu({ x, y, items, onClose }: ContextMenuProps) 
   const menuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    // 阻止鼠标滚轮事件
     const handleWheel = (e: WheelEvent) => {
       e.preventDefault();
     };
 
-    // 全局点击事件处理
     const handleGlobalClick = (e: MouseEvent) => {
-      // 如果点击的不是菜单本身，则关闭菜单
       if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
         onClose();
       }
     };
 
-    // 添加事件监听
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+
     document.addEventListener('wheel', handleWheel, { passive: false });
     document.addEventListener('click', handleGlobalClick);
+    document.addEventListener('keydown', handleKeyDown);
 
-    // 清理函数：移除事件监听
     return () => {
       document.removeEventListener('wheel', handleWheel);
       document.removeEventListener('click', handleGlobalClick);
+      document.removeEventListener('keydown', handleKeyDown);
     };
   }, [onClose]);
 
