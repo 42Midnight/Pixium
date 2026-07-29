@@ -1,0 +1,606 @@
+.detailContainer {
+  min-height: 100vh;
+  background-color: var(--bg-root);
+  padding: 0;
+}
+
+.detailLoading {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--bg-root);
+  color: var(--text-primary);
+  font-size: var(--text-xl);
+}
+
+.detailHeaderFixed {
+  position: fixed;
+  top: 60px;
+  left: 0;
+  right: 0;
+  z-index: 99;
+  background-color: rgb(31, 31, 31);
+  border-bottom: none;
+}
+
+.detailSubbar {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  background-color: rgb(31, 31, 31);
+  padding: 0 24px;
+  height: 60px;
+  border-bottom: none;
+}
+.detailSubbar button {
+  background: var(--btn-glass);
+  color: var(--text-primary);
+  border: none;
+  padding: 6px 16px;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  font-size: var(--text-base);
+  transition: background var(--transition-default);
+}
+.detailSubbar button:hover { background: var(--btn-glass-hover); }
+
+.detailFavBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 8px !important;
+}
+
+.detailFavBtn.favorited:hover {
+  background: rgba(255, 64, 129, 0.2) !important;
+}
+
+.backButton {
+  background-color: var(--btn-glass);
+  color: var(--text-primary);
+  border: none;
+  padding: 10px 20px;
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+  font-size: var(--text-base);
+  transition: background-color var(--transition-default);
+  margin: 0;
+}
+
+.backButton:hover {
+  background-color: var(--btn-glass-hover);
+}
+
+.navbarTitle {
+  color: var(--text-primary);
+  font-size: var(--text-xl);
+  font-weight: 600;
+  flex: 1;
+  text-align: center;
+  margin: 0 20px;
+}
+
+.navbarActions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.promptInfoText {
+  color: var(--text-primary);
+  font-size: var(--text-lg);
+  font-weight: 600;
+  margin-right: 10px;
+}
+
+.copySelectedButton {
+  background-color: var(--btn-glass);
+  color: var(--text-primary);
+  border: none;
+  padding: 6px 16px;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  font-size: var(--text-base);
+  transition: all var(--transition-default);
+  min-width: 120px;
+  text-align: center;
+}
+
+.copySelectedButton:hover {
+  background-color: var(--btn-glass-hover);
+}
+
+.copySelectedButton.copied {
+  background-color: var(--color-success);
+  color: var(--text-primary);
+}
+
+.copyAllButton {
+  background-color: var(--btn-glass);
+  color: var(--text-primary);
+  border: none;
+  padding: 6px 16px;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  font-size: var(--text-base);
+  transition: all var(--transition-default);
+  min-width: 120px;
+  text-align: center;
+}
+
+.copyAllButton:hover {
+  background-color: var(--btn-glass-hover);
+}
+
+.copyAllButton.copied {
+  background-color: var(--color-success);
+  color: var(--text-primary);
+}
+
+.detailContent {
+  display: flex;
+  gap: 30px;
+  max-width: 1600px;
+  margin: 0 auto;
+  padding: 140px 30px 30px 30px;
+}
+
+.detailLeft {
+  flex: 1;
+  min-width: 0;
+}
+
+.detailImageWrapper {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background-color: var(--bg-surface);
+  border-radius: var(--radius-xl);
+  padding: 20px;
+  margin-bottom: var(--space-6);
+  position: relative;
+}
+
+.detailImage {
+  max-width: 100%;
+  max-height: 70vh;
+  object-fit: contain;
+  border-radius: var(--radius-lg);
+}
+
+.detailInfo {
+  text-align: center;
+  color: var(--text-tertiary);
+  font-size: var(--text-base);
+  display: flex;
+  gap: 20px;
+  justify-content: center;
+}
+
+.detailFilename {
+  margin: 0 0 8px 0;
+}
+
+.multipleImagesContainer {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+  margin-bottom: var(--space-6);
+}
+
+.imageIndex {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  background: rgba(0, 0, 0, 0.7);
+  color: white;
+  padding: 4px 8px;
+  border-radius: var(--radius-sm);
+  font-size: var(--text-xs);
+  margin: 0;
+  z-index: 1;
+}
+
+.imageFilename {
+  text-align: center;
+  color: #999;
+  font-size: var(--text-xs);
+  margin: 4px 0 8px 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+  clear: both;
+  display: block;
+}
+
+.saveasButton {
+  background-color: var(--color-success);
+  color: var(--text-primary);
+  border: none;
+  padding: 10px 24px;
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+  font-size: var(--text-base);
+  font-weight: 500;
+  transition: background-color var(--transition-default);
+  min-width: 100px;
+  text-align: center;
+}
+
+.saveasButton:hover {
+  background-color: var(--color-success-dark);
+}
+
+.downloadButton {
+  background-color: var(--color-info);
+  color: var(--text-primary);
+  border: none;
+  padding: 10px 24px;
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+  font-size: var(--text-base);
+  font-weight: 500;
+  transition: background-color var(--transition-default);
+  min-width: 100px;
+  text-align: center;
+}
+
+.downloadButton:hover:not(:disabled) {
+  background-color: var(--color-info-hover);
+}
+
+.downloadButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.deleteButton {
+  background-color: var(--color-danger);
+  color: var(--text-primary);
+  border: none;
+  padding: 10px 24px;
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+  font-size: var(--text-base);
+  font-weight: 500;
+  transition: background-color var(--transition-default);
+  min-width: 100px;
+  text-align: center;
+}
+
+.deleteButton:hover {
+  background-color: var(--color-danger-hover);
+}
+
+.deleteConfirmOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: var(--bg-overlay);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.deleteConfirmDialog {
+  background-color: var(--bg-elevated);
+  border-radius: var(--radius-xl);
+  padding: var(--space-8);
+  max-width: 400px;
+  width: 90%;
+  text-align: center;
+  border: 1px solid var(--border-default);
+}
+
+.deleteConfirmTitle {
+  color: var(--text-primary);
+  font-size: var(--text-2xl);
+  font-weight: 600;
+  margin: 0 0 16px 0;
+}
+
+.deleteConfirmMessage {
+  color: var(--text-secondary);
+  font-size: var(--text-md);
+  line-height: 1.6;
+  margin: 0 0 28px 0;
+}
+
+.deleteConfirmButtons {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+}
+
+.deleteConfirmCancel {
+  background-color: var(--btn-glass);
+  color: var(--text-primary);
+  border: none;
+  padding: 10px 28px;
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+  font-size: var(--text-md);
+  font-weight: 500;
+  transition: background-color var(--transition-default);
+}
+
+.deleteConfirmCancel:hover:not(:disabled) {
+  background-color: var(--btn-glass-hover);
+}
+
+.deleteConfirmCancel:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.deleteConfirmOk {
+  background-color: var(--color-danger);
+  color: var(--text-primary);
+  border: none;
+  padding: 10px 28px;
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+  font-size: var(--text-md);
+  font-weight: 500;
+  transition: background-color var(--transition-default);
+}
+
+.deleteConfirmOk:hover:not(:disabled) {
+  background-color: var(--color-danger-hover);
+}
+
+.deleteConfirmOk:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.detailRight {
+  flex: 1;
+  min-width: 0;
+  max-width: 600px;
+}
+
+.detailTagsRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.detailTagPill {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: var(--radius-sm);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  background-color: #3a3a3a;
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+
+.promptList {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.promptCard {
+  background-color: var(--bg-surface);
+  border-radius: var(--radius-xl);
+  padding: 16px;
+  position: relative;
+  border: 1px solid var(--border-default);
+  transition: all var(--transition-default);
+}
+
+.promptCard:hover {
+  border-color: var(--border-input);
+}
+
+.promptCard.selected {
+  border-color: var(--color-success);
+  background-color: rgba(76, 175, 80, 0.1);
+}
+
+.promptCardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.promptFieldHeader {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  position: relative;
+}
+
+.promptFieldName {
+  color: var(--text-primary);
+  font-size: var(--text-lg);
+  font-weight: 600;
+  text-transform: capitalize;
+  margin-left: 26px;
+}
+
+.fieldCheckbox {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--color-success);
+  cursor: pointer;
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.copyButton {
+  background-color: var(--btn-glass);
+  color: var(--text-primary);
+  border: none;
+  padding: 6px 16px;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  font-size: var(--text-base);
+  transition: all var(--transition-default);
+  min-width: 80px;
+  text-align: center;
+}
+
+.copyButton:hover {
+  background-color: var(--btn-glass-hover);
+}
+
+.copyButton.copied {
+  background-color: var(--color-success);
+  color: var(--text-primary);
+}
+
+.promptCardContent {
+  color: var(--text-secondary);
+  font-size: var(--text-base);
+  line-height: 1.6;
+  word-break: break-word;
+  background-color: var(--bg-input);
+  padding: 12px;
+  border-radius: var(--radius-lg);
+}
+
+.noPrompt {
+  text-align: center;
+  padding: 40px;
+  color: var(--text-muted);
+  font-size: var(--text-lg);
+  background-color: var(--bg-surface);
+  border-radius: var(--radius-xl);
+}
+
+.noPrompt p {
+  margin: 0;
+}
+
+.imageContainer {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: zoom-in;
+  overflow: hidden;
+}
+
+.imageContainer:hover {
+  cursor: zoom-in;
+}
+
+.contextMenu {
+  position: fixed;
+  background-color: #2a2a2a;
+  border-radius: var(--radius-lg);
+  padding: 8px 0;
+  min-width: 160px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+  border: 1px solid var(--border-default);
+}
+
+.contextMenuItem {
+  padding: 10px 20px;
+  color: var(--text-primary);
+  cursor: pointer;
+  font-size: var(--text-base);
+  display: flex;
+  align-items: center;
+}
+
+.contextMenuItem:hover {
+  background-color: #3a3a3a;
+}
+
+.imageZoomOverlay {
+  position: fixed;
+  top: 60px;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 1);
+  z-index: 2000;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: zoom-out;
+}
+
+.imageZoomContainer {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  cursor: zoom-out;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.imageZoomContent {
+  max-width: 100%;
+  max-height: calc(100vh - 60px);
+  object-fit: contain;
+  cursor: zoom-out;
+}
+
+@media (max-width: 1024px) {
+  .detailContent {
+    flex-direction: column;
+  }
+
+  .detailRight {
+    max-width: 100%;
+  }
+
+  .detailImage {
+    max-height: 50vh;
+  }
+
+  .navbarTitle {
+    font-size: var(--text-lg);
+  }
+
+  .backButton {
+    padding: 8px 16px;
+  }
+
+  .copyAllButton,
+  .copySelectedButton,
+  .copyButton {
+    padding: 6px 12px;
+    font-size: var(--text-xs);
+  }
+
+  .promptInfoText {
+    font-size: var(--text-base);
+  }
+}
+
+@media (max-width: 600px) {
+  .detailContent {
+    padding: 20px;
+  }
+
+  .navbarTitle {
+    text-align: left;
+    margin: 0;
+  }
+
+  .navbarActions {
+    width: 100%;
+    justify-content: space-between;
+  }
+}

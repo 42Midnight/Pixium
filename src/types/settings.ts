@@ -6,4 +6,7 @@ export interface AppSettings {
   showImageFilename: boolean;
   newCollectionPosition?: 'front' | 'back';
   favoritesSortOrder: 'newest' | 'oldest';
+  allWorksCover?: string;
+  allWorksCoverPosition?: number;
+  allWorksCoverPositionVertical?: boolean;
 }

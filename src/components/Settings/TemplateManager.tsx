@@ -3,6 +3,7 @@ import { useTemplates } from '../../hooks/useTemplates';
 import ContextMenu from '../common/ContextMenu';
 import ConfirmDialog from '../common/ConfirmDialog';
 import type { Template, TemplateField } from '../../types';
+import styles from './Settings.module.css';
 
 export default function TemplateManager() {
   const { templates, createTemplate, deleteTemplate, updateTemplate, updateTemplateFields } = useTemplates();
@@ -58,35 +59,34 @@ export default function TemplateManager() {
   const activeTemplate = templates.find(t => t.id === activeTemplateId);
 
   return (
-    <div className="upload-template-container">
-      <div className="template-sidebar">
-        <div className="template-header">
-          <div className="template-actions">
-            <button className="template-create-btn" onClick={createTemplate}>
+    <div className={styles.uploadTemplateContainer}>
+      <div className={styles.templateSidebar}>
+        <div className={styles.templateHeader}>
+          <div className={styles.templateActions}>
+            <button className={styles.templateCreateBtn} onClick={createTemplate}>
               <span className="icon">+</span><span>新建</span>
             </button>
-            <button className="template-delete-btn" onClick={() => activeTemplateId && setDeleteTargetId(activeTemplateId)} disabled={!activeTemplateId}>
-              <span className="icon">🗑️</span><span>删除</span>
+            <button className={styles.templateDeleteBtn} onClick={() => activeTemplateId && setDeleteTargetId(activeTemplateId)} disabled={!activeTemplateId}>
+              <span>删除</span>
             </button>
           </div>
         </div>
-        <div className="template-list">
+        <div className={styles.templateList}>
           {templates.map(t => (
             <div
               key={t.id}
-              className={`template-item ${activeTemplateId === t.id ? 'active' : ''}`}
+              className={`${styles.templateItem} ${activeTemplateId === t.id ? styles.active : ''}`}
               onClick={() => switchTemplate(t.id)}
               onContextMenu={e => { e.preventDefault(); setContextMenu({ x: e.clientX, y: e.clientY, templateId: t.id }); }}
             >
-              <span className="template-icon">📄</span>
               {editingId === t.id ? (
-                <div className="template-edit-container">
+                <div className={styles.templateEditContainer}>
                   <input
                     ref={editInputRef}
                     type="text"
                     value={editingName}
                     onChange={e => setEditingName(e.target.value)}
-                    className="template-edit-input"
+                    className={styles.templateEditInput}
                     autoFocus
                     onBlur={() => { updateTemplate(t.id, { name: editingName.trim() || t.name }); setEditingId(null); }}
                     onKeyDown={e => {
@@ -113,33 +113,33 @@ export default function TemplateManager() {
         )}
       </div>
 
-      <div className="template-editor">
-        <h3 className="section-title">Prompt 配置</h3>
+      <div className={styles.templateEditor}>
+        <h3 className={styles.sectionTitle}>Prompt 配置</h3>
         {activeTemplate ? (
           <>
-            <div className="fields-container">
+            <div className={styles.fieldsContainer}>
               {fields.map(field => (
-                <div key={field.id} className="field-form">
-                  <div className="field-name-row">
+                <div key={field.id} className={styles.fieldForm}>
+                  <div className={styles.fieldNameRow}>
                     <input type="text" placeholder="字段名" value={field.name}
                       onChange={e => handleUpdateField(field.id!, 'name', e.target.value)}
-                      className="field-name-input" spellCheck="false" />
-                    <button className="delete-field-btn" onClick={() => handleDeleteField(field.id!)} title="删除此字段">
+                      className={styles.fieldNameInput} spellCheck="false" />
+                    <button className={styles.deleteFieldBtn} onClick={() => handleDeleteField(field.id!)} title="删除此字段">
                       <span>×</span>
                     </button>
                   </div>
                   <textarea placeholder="字段值" value={field.value}
                     onChange={e => handleUpdateField(field.id!, 'value', e.target.value)}
-                    className="field-value-input" spellCheck="false" />
+                    className={styles.fieldValueInput} spellCheck="false" />
                 </div>
               ))}
             </div>
-            <button className="add-field-btn" onClick={handleAddField}>
-              <span className="icon">+</span><span>添加字段</span>
+            <button className={styles.addFieldBtn} onClick={handleAddField}>
+              添加字段
             </button>
           </>
         ) : (
-          <div className="no-template-message">请先创建一个模板</div>
+          <div className={styles.noTemplateMessage}>请先创建一个模板</div>
         )}
       </div>
 

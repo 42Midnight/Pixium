@@ -1,0 +1,287 @@
+/* TitleBar */
+.titlebarDrag {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 48px;
+  z-index: 9999;
+  background: #0d0d0d;
+  user-select: none;
+}
+
+.winCtrlBtn {
+  background: transparent;
+  border: none;
+  color: var(--text-primary);
+  width: 36px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  border-radius: 0;
+  transition: background var(--transition-fast);
+}
+.winCtrlBtn:hover { background: rgba(255,255,255,0.12); }
+.winCloseBtn:hover { background: #e81123; }
+
+.pinButton {
+  background: transparent;
+  border: none;
+  color: var(--text-primary);
+  font-size: var(--text-base);
+  width: 36px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  border-radius: 0;
+  transition: background var(--transition-fast);
+}
+.pinButton:hover { background: rgba(255,255,255,0.12); }
+
+.titlebarTitle {
+  color: var(--text-primary);
+  font-size: var(--text-lg);
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ConfirmDialog */
+.dialogOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: var(--bg-overlay);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.dialog {
+  background-color: var(--bg-elevated);
+  border-radius: var(--radius-xl);
+  padding: var(--space-8);
+  max-width: 400px;
+  width: 90%;
+  text-align: center;
+  border: 1px solid var(--border-default);
+}
+
+.dialogTitle {
+  color: var(--text-primary);
+  font-size: var(--text-2xl);
+  font-weight: 600;
+  margin: 0 0 16px 0;
+}
+
+.dialogMessage {
+  color: var(--text-secondary);
+  font-size: var(--text-md);
+  line-height: 1.6;
+  margin: 0 0 28px 0;
+}
+
+.dialogButtons {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+}
+
+.dialogBtn {
+  border: none;
+  padding: 10px 28px;
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+  font-size: var(--text-md);
+  font-weight: 500;
+  transition: background-color var(--transition-default);
+}
+
+.dialogBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.dialogBtnCancel {
+  background-color: var(--btn-glass);
+  color: var(--text-primary);
+}
+
+.dialogBtnCancel:hover:not(:disabled) {
+  background-color: var(--btn-glass-hover);
+}
+
+.dialogBtnConfirm {
+  background-color: var(--color-danger);
+  color: var(--text-primary);
+}
+
+.dialogBtnConfirm:hover:not(:disabled) {
+  background-color: var(--color-danger-hover);
+}
+
+/* ContextMenu */
+.contextMenuOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 10000;
+}
+
+.contextMenu {
+  background-color: #2a2a2a;
+  border-radius: var(--radius-lg);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+  min-width: 120px;
+  overflow: hidden;
+}
+
+.contextMenuItem {
+  padding: 12px 20px;
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: background-color var(--transition-default);
+  font-size: var(--text-base);
+}
+
+.contextMenuItem:hover {
+  background-color: #3a3a3a;
+}
+
+.contextMenuItem.danger {
+  color: #ff6b6b;
+}
+
+.contextMenuItem.danger:hover {
+  background-color: rgba(255, 107, 107, 0.2);
+}
+
+/* CoverAdjustModal */
+.coverModal {
+  background-color: var(--bg-elevated);
+  border-radius: var(--radius-xl);
+  border: 1px solid var(--border-default);
+  overflow: hidden;
+}
+
+.coverModalHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border-default);
+}
+
+.coverModalTitle {
+  color: var(--text-primary);
+  font-size: var(--text-xl);
+  font-weight: 600;
+}
+
+.coverModalClose {
+  background: none;
+  border: none;
+  color: var(--text-primary);
+  font-size: 24px;
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
+}
+
+.coverModalContent {
+  padding: var(--space-6);
+  display: flex;
+  justify-content: center;
+}
+
+.coverCropArea {
+  width: 300px;
+  height: 300px;
+  position: relative;
+  overflow: hidden;
+  cursor: grab;
+}
+
+.coverCropArea:active {
+  cursor: grabbing;
+}
+
+.coverCropImageWrapper {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+.coverCropImage {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  max-width: none;
+  max-height: none;
+}
+
+.coverCropFrame {
+  position: absolute;
+  inset: 0;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.5);
+  pointer-events: none;
+}
+
+.coverModalFooter {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  padding: 16px 20px;
+  border-top: 1px solid var(--border-default);
+}
+
+.coverModalConfirm,
+.coverModalReset,
+.coverModalCancel {
+  padding: 8px 20px;
+  border-radius: var(--radius-md);
+  border: none;
+  font-size: var(--text-base);
+  cursor: pointer;
+}
+
+.coverModalConfirm {
+  background-color: var(--color-success);
+  color: var(--text-primary);
+}
+
+.coverModalConfirm:hover {
+  background-color: var(--color-success-dark);
+}
+
+.coverModalReset {
+  background-color: var(--btn-glass);
+  color: var(--text-primary);
+}
+
+.coverModalReset:hover {
+  background-color: var(--btn-glass-hover);
+}
+
+.coverModalCancel {
+  background-color: var(--btn-glass);
+  color: var(--text-primary);
+}
+
+.coverModalCancel:hover {
+  background-color: var(--btn-glass-hover);
+}

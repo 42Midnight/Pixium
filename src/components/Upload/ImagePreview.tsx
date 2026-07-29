@@ -1,4 +1,5 @@
 import { useMemo } from 'react';
+import styles from './Upload.module.css';
 
 interface ImagePreviewProps {
   previewImages: string[];
@@ -41,30 +42,30 @@ export default function ImagePreview({
   if (previewImages.length === 0) {
     return (
       <>
-        <div className="upload-icon">+</div>
-        <p className="upload-text">点击或拖拽多张图片到此处上传</p>
+        <div className={styles.uploadIcon}>+</div>
+        <p className={styles.uploadText}>点击或拖拽多张图片到此处上传</p>
       </>
     );
   }
 
   return (
-    <div className="preview-section">
-      <div className="preview-header">
-        <span className="preview-title">预览图片 ({previewImages.length})</span>
-        <button className="clear-all-btn" onClick={onClearAll}>清空全部</button>
+    <div className={styles.previewSection}>
+      <div className={styles.previewHeader}>
+        <span className={styles.previewTitle}>预览图片 ({previewImages.length})</span>
+        <button className={styles.clearAllBtn} onClick={onClearAll}>清空全部</button>
       </div>
-      <div className="preview-images">
+      <div className={styles.previewImages}>
         {displayImages.map((image, index) => {
           const isDragging = draggingImage === image;
           return (
-            <div key={index} className={`preview-image-wrapper ${isDragging ? 'dragging' : ''}`}
+            <div key={index} className={`${styles.previewImageWrapper} ${isDragging ? styles.dragging : ''}`}
               draggable="true"
               onDragStart={e => onDragStart(e, index)}
               onDragOver={e => onDragOver(e, index)}
               onDrop={onDrop}>
-              <img src={image} alt={`预览 ${index + 1}`} className="preview-image" />
-              {displayFiles[index] && <span className="image-filename">{displayFiles[index].name}</span>}
-              <button type="button" className="remove-image-btn" onClick={e => {
+              <img src={image} alt={`预览 ${index + 1}`} className={styles.previewImage} />
+              {displayFiles[index] && <span className={styles.imageFilename}>{displayFiles[index].name}</span>}
+              <button type="button" className={styles.removeImageBtn} onClick={e => {
                 e.stopPropagation();
                 const originalIndex = previewImages.indexOf(image);
                 onRemove(originalIndex !== -1 ? originalIndex : index);

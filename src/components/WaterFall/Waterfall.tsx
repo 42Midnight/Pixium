@@ -6,13 +6,16 @@ import { useSettings } from '../../hooks/useSettings';
 import { useFavorites } from '../../hooks/useFavorites';
 import { isElectronAvailable } from '../../services/electron';
 import { formatDate, isSameDay } from '../../utils/format';
+import { buildSearchIndex, searchItems, getSuggestions } from '../../utils/search';
+import type { SearchIndex, Suggestion } from '../../utils/search';
+import { ALL_WORKS_ID, ALL_WORKS_NAME, UNCATEGORIZED_FOLDER } from '../../utils/constants';
 import TitleBar from '../common/TitleBar';
 import ConfirmDialog from '../common/ConfirmDialog';
 import ContextMenu from '../common/ContextMenu';
 import CollectionCard from './CollectionCard';
 import WorkCard from './WorkCard';
 import type { Collection, WorkData } from '../../types';
-import './Waterfall.css';
+import styles from './Waterfall.module.css';
 
 interface CardPosition {
   left: string;
@@ -28,7 +31,7 @@ export default function WaterFall() {
   const { folderName } = useParams<{ folderName?: string }>();
   const containerRef = useRef<HTMLDivElement>(null);
   const { collections, isLoading: collsLoading, setCollections, loadCollections, saveCollections } = useCollections();
-  const { works, isLoading: worksLoading, loadWorks, getCollectionWorks } = useWorks();
+  const { works, workMap, isLoading: worksLoading, loadWorks, getCollectionWorks, getAllWorks } = useWorks();
   const { settings } = useSettings();
   const { toggleFavorite, isFavorite, removeFavorites } = useFavorites();
   const isLoading = collsLoading || worksLoading;
@@ -38,9 +41,23 @@ export default function WaterFall() {
     savedScrollPositions[location.pathname] = window.scrollY;
   }, [location.pathname]);
 
+  const allWorksCollection: Collection = useMemo(() => ({
+    id: ALL_WORKS_ID,
+    name: ALL_WORKS_NAME,
+    folder: ALL_WORKS_ID,
+    cover: settings.allWorksCover || null,
+    coverPosition: settings.allWorksCoverPosition,
+    coverPositionVertical: settings.allWorksCoverPositionVertical,
+    images: [],
+  }), [settings.allWorksCover, settings.allWorksCoverPosition, settings.allWorksCoverPositionVertical]);
+
   const activeCollection = useMemo(
-    () => (folderName ? collections.find(c => c.folder === folderName) || null : null),
-    [folderName, collections],
+    () => {
+      if (!folderName) return null;
+      if (folderName === ALL_WORKS_ID) return allWorksCollection;
+      return collections.find(c => c.folder === folderName) || null;
+    },
+    [folderName, collections, allWorksCollection],
   );
 
   const [columns, setColumns] = useState<number[]>([]);
@@ -110,22 +127,24 @@ export default function WaterFall() {
   }, []);
 
   const getDisplayItems = useCallback((): (WorkData | Collection)[] => {
-    if (!activeCollection) return draggingCollection ? displayCollections : collections;
+    if (!activeCollection) {
+      const base = draggingCollection ? displayCollections : collections;
+      return [allWorksCollection, ...base];
+    }
+    if (activeCollection.id === ALL_WORKS_ID) return getAllWorks();
     return getCollectionWorks(activeCollection);
-  }, [activeCollection, collections, draggingCollection, displayCollections, getCollectionWorks]);
+  }, [activeCollection, collections, draggingCollection, displayCollections, getCollectionWorks, getAllWorks, allWorksCollection]);
 
   const items = useMemo(() => getDisplayItems(), [getDisplayItems]);
 
+  const searchIndex: SearchIndex | null = useMemo(() => {
+    if (items.length === 0) return null;
+    return buildSearchIndex(items);
+  }, [items]);
+
   const filteredItems = useMemo(() => {
-    if (!submittedQuery.trim()) return items;
-    const q = submittedQuery.trim().toLowerCase();
-    return items.filter(item => {
-      if ('title' in item) {
-        return item.title.toLowerCase().includes(q);
-      }
-      return item.name.toLowerCase().includes(q);
-    });
-  }, [items, submittedQuery]);
+    return searchItems(items, submittedQuery, searchIndex);
+  }, [items, submittedQuery, searchIndex]);
 
   const calculateCardPositions = useCallback((count: number) => {
     if (!containerRef.current) return;
@@ -155,10 +174,17 @@ export default function WaterFall() {
     calculateCardPositions(count);
   }, [calculateColumnCount, calculateCardPositions]);
 
+  const layoutRafRef = useRef(0);
   useEffect(() => {
-    initMasonry();
+    cancelAnimationFrame(layoutRafRef.current);
+    layoutRafRef.current = requestAnimationFrame(() => {
+      initMasonry();
+    });
     window.addEventListener('resize', initMasonry);
-    return () => window.removeEventListener('resize', initMasonry);
+    return () => {
+      cancelAnimationFrame(layoutRafRef.current);
+      window.removeEventListener('resize', initMasonry);
+    };
   }, [initMasonry, collections, works, activeCollection]);
 
   useEffect(() => {
@@ -169,6 +195,26 @@ export default function WaterFall() {
 
   // Collection cover helper
   const getCollectionCover = useCallback((collection: Collection) => {
+    // Virtual "All Works" collection: use settings cover or fallback to latest work
+    if (collection.id === ALL_WORKS_ID) {
+      if (settings.allWorksCover) {
+        return {
+          cover: settings.allWorksCover,
+          coverPosition: settings.allWorksCoverPosition,
+          coverPositionVertical: settings.allWorksCoverPositionVertical,
+        };
+      }
+      // Fallback to latest work's cover
+      if (works.length > 0) {
+        const sorted = [...works].sort((a, b) => {
+          const ta = a.createdAt?.timestamp || a.timestamp || 0;
+          const tb = b.createdAt?.timestamp || b.timestamp || 0;
+          return tb - ta;
+        });
+        return { cover: sorted[0].cover, coverPosition: sorted[0].coverPosition };
+      }
+      return { cover: null, coverPosition: undefined as number | undefined };
+    }
     if (collection.cover) {
       const expectedPath = `image/collection_covers/${collection.folder}/cover.`;
       if (collection.cover.includes(expectedPath)) {
@@ -179,7 +225,7 @@ export default function WaterFall() {
       let latestWork: WorkData | null = null;
       let latestTs = 0;
       for (const imgPath of collection.images) {
-        const w = works.find(w => w.id === imgPath || w.folder === imgPath);
+        const w = workMap.get(imgPath);
         if (w) {
           const ts = w.createdAt?.timestamp || w.timestamp || 0;
           if (ts > latestTs) { latestTs = ts; latestWork = w; }
@@ -188,7 +234,7 @@ export default function WaterFall() {
       if (latestWork) return { cover: latestWork.cover, coverPosition: latestWork.coverPosition };
     }
     return { cover: null, coverPosition: undefined as number | undefined };
-  }, [works]);
+  }, [workMap, settings.allWorksCover, settings.allWorksCoverPosition, settings.allWorksCoverPositionVertical]);
 
   const handleBackToCollections = useCallback(() => {
     navigate('/', { replace: true });
@@ -214,9 +260,9 @@ export default function WaterFall() {
 
   const isAllSelected = useCallback(() => {
     if (!activeCollection) return collections.length > 0 && selectedWorks.length === collections.length;
-    const ws = getCollectionWorks(activeCollection);
+    const ws = activeCollection.id === ALL_WORKS_ID ? getAllWorks() : getCollectionWorks(activeCollection);
     return ws.length > 0 && selectedWorks.length === ws.length;
-  }, [activeCollection, collections, selectedWorks, getCollectionWorks]);
+  }, [activeCollection, collections, selectedWorks, getCollectionWorks, getAllWorks]);
 
   const handleSelectAll = useCallback(() => {
     if (isAllSelected()) {
@@ -224,7 +270,8 @@ export default function WaterFall() {
     } else if (!activeCollection) {
       setSelectedWorks([...collections]);
     } else {
-      setSelectedWorks([...getCollectionWorks(activeCollection)]);
+      const ws = activeCollection.id === ALL_WORKS_ID ? getAllWorks() : getCollectionWorks(activeCollection);
+      setSelectedWorks([...ws]);
     }
   }, [isAllSelected, activeCollection, collections, getCollectionWorks]);
 
@@ -344,10 +391,12 @@ export default function WaterFall() {
     setDraggingCollection(null);
   }, [draggingCollection, dragOverIndex, displayCollections, setCollections]);
 
-  // Date grouping
-  const getWorksGroupedByDate = useCallback(() => {
+  // Date grouping (memoized)
+  const dateGroups = useMemo(() => {
     if (!activeCollection) return [];
-    const collWorks = getCollectionWorks(activeCollection);
+    const collWorks = activeCollection.id === ALL_WORKS_ID
+      ? getAllWorks()
+      : getCollectionWorks(activeCollection);
     if (!collWorks.length) return [];
 
     const sortOrder = settings.workSortOrder;
@@ -370,33 +419,24 @@ export default function WaterFall() {
       }
     }
     return groups;
-  }, [activeCollection, getCollectionWorks, settings.workSortOrder]);
+  }, [activeCollection, getCollectionWorks, getAllWorks, settings.workSortOrder]);
 
-  const suggestions = useMemo(() => {
+  const suggestions: Suggestion[] = useMemo(() => {
     if (!inputQuery.trim()) return [];
-    const q = inputQuery.trim().toLowerCase();
-    return items
-      .filter(item => {
-        if ('title' in item) {
-          return item.title.toLowerCase().includes(q);
-        }
-        return item.name.toLowerCase().includes(q);
-      })
-      .slice(0, 8)
-      .map(item => 'title' in item ? (item as WorkData).title : (item as Collection).name);
-  }, [items, inputQuery]);
+    return getSuggestions(searchIndex, inputQuery.trim(), 8);
+  }, [inputQuery, searchIndex]);
 
-  if (isLoading) return <div className="waterfall-page"><div className="loading">加载中...</div></div>;
+  if (isLoading) return <div className={styles.waterfallPage}><div className={styles.loading}>加载中...</div></div>;
 
   return (
-    <div className={`waterfall-page ${isBatchMode ? 'batch-mode' : ''}`}>
+    <div className={`${styles.waterfallPage} ${isBatchMode ? styles.batchMode : ''}`}>
       <TitleBar title={!activeCollection ? 'Pixium' : activeCollection.name} onBack={activeCollection ? handleBackToCollections : undefined} />
 
-      <div className="navbar-actions-bar">
-        <div className="search-wrapper">
+      <div className={styles.navbarActionsBar}>
+        <div className={styles.searchWrapper}>
           <input
             type="text"
-            className="search-input"
+            className={styles.searchInput}
             placeholder={!activeCollection ? '搜索相册...' : '搜索作品...'}
             value={inputQuery}
             onChange={e => { setInputQuery(e.target.value); setShowSuggestions(true); }}
@@ -407,7 +447,7 @@ export default function WaterFall() {
           />
           {inputQuery.trim() && (
             <button
-              className="search-clear-btn"
+              className={styles.searchClearBtn}
               onClick={() => { setInputQuery(''); setSubmittedQuery(''); }}
               title="清除搜索"
             >
@@ -415,102 +455,111 @@ export default function WaterFall() {
             </button>
           )}
           {showSuggestions && suggestions.length > 0 && (
-            <div className="search-suggestions">
-              {suggestions.map((name, i) => (
+            <div className={styles.searchSuggestions}>
+              {suggestions.map((s, i) => (
                 <div
                   key={i}
-                  className="search-suggestion-item"
-                  onMouseDown={() => { setInputQuery(name); setSubmittedQuery(name); setShowSuggestions(false); }}
+                  className={styles.searchSuggestionItem}
+                  onMouseDown={() => { setInputQuery(s.text); setSubmittedQuery(s.text); setShowSuggestions(false); }}
                 >
-                  {name}
+                  <span className={styles.suggestionText}>{s.text}</span>
+                  <span className={styles.suggestionField}>{s.field}</span>
                 </div>
               ))}
             </div>
           )}
         </div>
-        <div className="navbar-actions">
+        <div className={styles.navbarActions}>
           {!isBatchMode ? (
             <>
-              <button className="navbar-batch-btn" onClick={() => setIsBatchMode(true)}>批量选择</button>
+              <button className={styles.navbarBatchBtn} onClick={() => setIsBatchMode(true)}>批量选择</button>
               {!activeCollection ? (
-                <button className="navbar-add-btn" onClick={() => navigate('/create-collection')}>
-                  <span className="add-icon">+</span><span className="add-text">新建相册</span>
+                <button className={styles.navbarAddBtn} onClick={() => navigate('/create-collection')}>
+                  新建相册
                 </button>
               ) : (
-                <button className="navbar-add-btn" onClick={() => navigate('/upload', { state: { collectionId: activeCollection.id, collectionFolder: activeCollection.folder } })}>
-                  <span className="add-icon">+</span><span className="add-text">添加作品</span>
+                <button className={styles.navbarAddBtn} onClick={() => {
+                  if (activeCollection.id === ALL_WORKS_ID) {
+                    navigate('/upload', { state: { isAllWorks: true, collectionFolder: UNCATEGORIZED_FOLDER } });
+                  } else {
+                    navigate('/upload', { state: { collectionId: activeCollection.id, collectionFolder: activeCollection.folder } });
+                  }
+                }}>
+                  添加作品
                 </button>
               )}
             </>
           ) : (
             <>
-              <span className="selected-count">{selectedWorks.length} 个已选</span>
-              <button className="navbar-select-all-btn" onClick={handleSelectAll}>{isAllSelected() ? '取消全选' : '全选'}</button>
-              <button className="navbar-batch-btn" onClick={() => { setIsBatchMode(false); setSelectedWorks([]); }}>取消</button>
+              <span className={styles.selectedCount}>{selectedWorks.length} 个已选</span>
+              <button className={styles.navbarSelectAllBtn} onClick={handleSelectAll}>{isAllSelected() ? '取消全选' : '全选'}</button>
+              <button className={styles.navbarCancelBtn} onClick={() => { setIsBatchMode(false); setSelectedWorks([]); }}>取消</button>
             </>
           )}
         </div>
       </div>
 
-      <div className="waterfall-container" ref={containerRef}>
+      <div className={styles.waterfallContainer} ref={containerRef}>
         {items.length === 0 ? (
-          <div className="empty-state">
+          <div className={styles.emptyState}>
             <p>{!activeCollection ? '暂无相册' : '该相册暂无作品'}</p>
             <button onClick={() => !activeCollection ? navigate('/create-collection') : navigate('/upload', { state: { collectionId: activeCollection?.id, collectionFolder: activeCollection?.folder } })}>
               {!activeCollection ? '创建第一个相册' : '添加作品'}
             </button>
           </div>
         ) : filteredItems.length === 0 ? (
-          <div className="empty-state">
+          <div className={styles.emptyState}>
             <p>未找到匹配的结果</p>
           </div>
         ) : !activeCollection ? (
-          (submittedQuery.trim()
-            ? displayCollections.filter(c => c.name.toLowerCase().includes(submittedQuery.trim().toLowerCase()))
-            : displayCollections
-          ).map((collection, index) => {
+          filteredItems.map((item, index) => {
+            const collection = item as Collection;
+            const isVirtual = collection.id === ALL_WORKS_ID;
             const { cover, coverPosition: cp } = getCollectionCover(collection);
             return (
               <CollectionCard
                 key={collection.id}
                 collection={collection}
-                index={index}
+                index={isVirtual ? -1 : index}
                 position={cardPositions[collection.id] || { left: '0px', top: '0px', width: '16%' }}
                 isSelected={selectedWorks.some(w => w.id === collection.id)}
                 isBatchMode={isBatchMode}
-                isDragging={draggingCollection?.id === collection.id}
-                isDragOver={!draggingCollection || draggingCollection.id === collection.id ? false : dragOverIndex === index}
+                isDragging={isVirtual ? false : draggingCollection?.id === collection.id}
+                isDragOver={isVirtual ? false : (!draggingCollection || draggingCollection.id === collection.id ? false : dragOverIndex === index)}
                 coverUrl={cover}
                 coverPosition={cp}
                 coverPositionVertical={collection.coverPositionVertical}
-                workCount={collection.images?.length || 0}
+                workCount={isVirtual ? works.length : (collection.images?.length || 0)}
                 onClick={handleCollectionClick}
-                onContextMenu={(e, c) => { e.preventDefault(); e.stopPropagation(); setCollectionContextMenu({ x: e.clientX, y: e.clientY, collection: c }); }}
-                onDragStart={handleCollectionDragStart}
-                onDragOver={handleCollectionDragOver}
-                onDrop={handleCollectionDrop}
-                onDragEnd={() => { setDraggingCollection(null); setDragOverIndex(-1); }}
+                onContextMenu={isVirtual
+                  ? (e, c) => { e.preventDefault(); e.stopPropagation(); }
+                  : (e, c) => { e.preventDefault(); e.stopPropagation(); setCollectionContextMenu({ x: e.clientX, y: e.clientY, collection: c }); }
+                }
+                onDragStart={isVirtual ? () => {} : handleCollectionDragStart}
+                onDragOver={isVirtual ? () => {} : handleCollectionDragOver}
+                onDrop={isVirtual ? () => {} : handleCollectionDrop}
+                onDragEnd={isVirtual ? () => {} : () => { setDraggingCollection(null); setDragOverIndex(-1); }}
               />
             );
           })
         ) : settings.showDateGrouping ? (
-          getWorksGroupedByDate().map(group => {
+          dateGroups.map(group => {
             const filteredWorks = submittedQuery.trim()
-              ? group.works.filter(w => w.title.toLowerCase().includes(submittedQuery.trim().toLowerCase()))
+              ? group.works.filter(w => filteredItems.some(fi => fi.id === w.id))
               : group.works;
             if (filteredWorks.length === 0) return null;
             const isGroupSelected = filteredWorks.every(w => selectedWorkIds.has(w.id));
             return (
-              <div key={group.dateStr} className="date-group">
-                <div className="date-header" onClick={() => {
+              <div key={group.dateStr} className={styles.dateGroup}>
+                <div className={styles.dateHeader} onClick={() => {
                   if (!isBatchMode) return;
                   if (isGroupSelected) setSelectedWorks(prev => prev.filter(s => !filteredWorks.some(w => w.id === s.id)));
                   else setSelectedWorks(prev => [...prev, ...filteredWorks.filter(w => !prev.some(s => s.id === w.id))]);
                 }}>
-                  <span className="date-text">{group.dateStr}</span>
-                  {isBatchMode && <div className={`group-checkbox ${isGroupSelected ? 'checked' : ''}`}>{isGroupSelected && <span className="checkmark">✓</span>}</div>}
+                  <span className={styles.dateText}>{group.dateStr}</span>
+                  {isBatchMode && <div className={`${styles.groupCheckbox} ${isGroupSelected ? styles.checked : ''}`}>{isGroupSelected && <span className={styles.checkmark}>✓</span>}</div>}
                 </div>
-                <div className="date-group-content">
+                <div className={styles.dateGroupContent}>
                   {filteredWorks.map(work => (
                     <WorkCard key={work.id} work={work} isSelected={selectedWorkIds.has(work.id)}
                       isBatchMode={isBatchMode} useAbsolutePosition={false}
@@ -538,12 +587,12 @@ export default function WaterFall() {
       </div>
 
       {isBatchMode && (
-        <div className="batch-delete-bar">
+        <div className={styles.batchDeleteBar}>
           {activeCollection ? (
             <>
-              <button className="batch-move-btn" onClick={() => { setConfirmAction('move'); setShowMoveConfirm(true); }} disabled={selectedWorks.length === 0}>移动到...</button>
-              <button className="batch-move-btn" onClick={() => { setConfirmAction('copy'); setShowMoveConfirm(true); }} disabled={selectedWorks.length === 0}>复制到...</button>
-              <button className="batch-download-btn" onClick={async () => {
+              <button className={styles.batchMoveBtn} onClick={() => { setConfirmAction('move'); setShowMoveConfirm(true); }} disabled={selectedWorks.length === 0}>移动到...</button>
+              <button className={styles.batchMoveBtn} onClick={() => { setConfirmAction('copy'); setShowMoveConfirm(true); }} disabled={selectedWorks.length === 0}>复制到...</button>
+              <button className={styles.batchDownloadBtn} onClick={async () => {
                 const dlPath = settings.downloadPath;
                 if (!dlPath) { alert('请先在设置中配置下载路径'); return; }
                 if (!isElectronAvailable()) return;
@@ -552,7 +601,7 @@ export default function WaterFall() {
                 }
                 alert(`已下载 ${selectedWorks.length} 个作品`);
               }} disabled={selectedWorks.length === 0}>下载</button>
-              <button className="batch-download-btn" onClick={async () => {
+              <button className={styles.batchDownloadBtn} onClick={async () => {
                 if (!isElectronAvailable()) return;
                 const selectResult = await window.electronAPI!.selectFolder();
                 if (!selectResult.success || !selectResult.path) return;
@@ -561,32 +610,46 @@ export default function WaterFall() {
                 }
                 alert(`已保存 ${selectedWorks.length} 个作品到 ${selectResult.path}`);
               }} disabled={selectedWorks.length === 0}>另存为</button>
-              <button className="batch-delete-btn" onClick={() => setShowDeleteConfirm(true)} disabled={selectedWorks.length === 0}>删除</button>
+              <button className={styles.batchDeleteBtn} onClick={() => setShowDeleteConfirm(true)} disabled={selectedWorks.length === 0}>删除</button>
             </>
           ) : (
             <>
-              <button className="batch-download-btn" onClick={async () => {
+              <button className={styles.batchDownloadBtn} onClick={async () => {
                 const dlPath = settings.downloadPath;
                 if (!dlPath) { alert('请先在设置中配置下载路径'); return; }
                 if (!isElectronAvailable()) return;
-                for (const item of selectedWorks) {
-                  const c = item as Collection;
-                  const result = await window.electronAPI!.downloadCollectionImages(c.folder, dlPath, c.images || []);
-                  if (!result.success) alert(`下载 ${c.name} 失败: ${result.error}`);
+                if (selectedWorks.length === 1 && selectedWorks[0].id === ALL_WORKS_ID) {
+                  for (const w of works) {
+                    await window.electronAPI!.downloadImage(w.id, dlPath);
+                  }
+                  alert(`已下载 ${works.length} 个作品`);
+                } else {
+                  for (const item of selectedWorks) {
+                    const c = item as Collection;
+                    const result = await window.electronAPI!.downloadCollectionImages(c.folder, dlPath, c.images || []);
+                    if (!result.success) alert(`下载 ${c.name} 失败: ${result.error}`);
+                  }
+                  alert(`已下载 ${selectedWorks.length} 个相册`);
                 }
-                alert(`已下载 ${selectedWorks.length} 个相册`);
-              }} disabled={selectedWorks.length === 0}>下载</button>
-              <button className="batch-download-btn" onClick={async () => {
+              }} disabled={selectedWorks.length === 0 || (selectedWorks.some(w => w.id === ALL_WORKS_ID) && selectedWorks.length > 1)}>下载</button>
+              <button className={styles.batchDownloadBtn} onClick={async () => {
                 if (!isElectronAvailable()) return;
                 const selectResult = await window.electronAPI!.selectFolder();
                 if (!selectResult.success || !selectResult.path) return;
-                for (const item of selectedWorks) {
-                  const c = item as Collection;
-                  await window.electronAPI!.downloadCollectionImages(c.folder, selectResult.path, c.images || []);
+                if (selectedWorks.length === 1 && selectedWorks[0].id === ALL_WORKS_ID) {
+                  for (const w of works) {
+                    await window.electronAPI!.downloadImage(w.id, selectResult.path);
+                  }
+                  alert(`已保存 ${works.length} 个作品到 ${selectResult.path}`);
+                } else {
+                  for (const item of selectedWorks) {
+                    const c = item as Collection;
+                    await window.electronAPI!.downloadCollectionImages(c.folder, selectResult.path, c.images || []);
+                  }
+                  alert(`已保存 ${selectedWorks.length} 个相册到 ${selectResult.path}`);
                 }
-                alert(`已保存 ${selectedWorks.length} 个相册到 ${selectResult.path}`);
-              }} disabled={selectedWorks.length === 0}>另存为</button>
-              <button className="batch-delete-btn" onClick={() => setShowDeleteConfirm(true)} disabled={selectedWorks.length === 0}>删除</button>
+              }} disabled={selectedWorks.length === 0 || (selectedWorks.some(w => w.id === ALL_WORKS_ID) && selectedWorks.length > 1)}>另存为</button>
+              <button className={styles.batchDeleteBtn} onClick={() => setShowDeleteConfirm(true)} disabled={selectedWorks.length === 0 || selectedWorks.some(w => w.id === ALL_WORKS_ID)}>删除</button>
             </>
           )}
         </div>
@@ -598,23 +661,23 @@ export default function WaterFall() {
       )}
 
       {showMoveConfirm && (
-        <div className="delete-confirm-overlay" onClick={() => { setShowMoveConfirm(false); setConfirmAction(null); setSingleWorkAction(null); }}>
-          <div className="delete-confirm-dialog" onClick={e => e.stopPropagation()} onKeyDown={e => { if (e.key === 'Escape') { setShowMoveConfirm(false); setConfirmAction(null); setSingleWorkAction(null); } }}>
-            <h3 className="delete-confirm-title">{confirmAction === 'copy' ? '复制到...' : '移动到...'}</h3>
-            <p className="delete-confirm-message">请选择目标相册：</p>
-            <div className="move-collection-list">
-              {collections.filter(c => c.id !== activeCollection?.id && c.mode === activeCollection?.mode).map(c => (
-                <div key={c.id} className={`move-collection-item ${selectedTargetCollection?.id === c.id ? 'selected' : ''}`}
+        <div className={styles.deleteConfirmOverlay} onClick={() => { setShowMoveConfirm(false); setConfirmAction(null); setSingleWorkAction(null); }}>
+          <div className={styles.deleteConfirmDialog} onClick={e => e.stopPropagation()} onKeyDown={e => { if (e.key === 'Escape') { setShowMoveConfirm(false); setConfirmAction(null); setSingleWorkAction(null); } }}>
+            <h3 className={styles.deleteConfirmTitle}>{confirmAction === 'copy' ? '复制到...' : '移动到...'}</h3>
+            <p className={styles.deleteConfirmMessage}>请选择目标相册：</p>
+            <div className={styles.moveCollectionList}>
+              {collections.filter(c => c.id !== activeCollection?.id).map(c => (
+                <div key={c.id} className={`${styles.moveCollectionItem} ${selectedTargetCollection?.id === c.id ? styles.selected : ''}`}
                   onClick={() => setSelectedTargetCollection(c)}>{c.name}</div>
               ))}
             </div>
-            <div className="delete-confirm-buttons">
-              <button className="delete-confirm-delete" disabled={!selectedTargetCollection} onClick={() => {
+            <div className={styles.deleteConfirmButtons}>
+              <button className={styles.deleteConfirmDelete} disabled={!selectedTargetCollection} onClick={() => {
                 if (!selectedTargetCollection) return;
                 if (confirmAction === 'copy') handleConfirmCopy(selectedTargetCollection);
                 else handleConfirmMove(selectedTargetCollection);
               }}>确定</button>
-              <button className="delete-confirm-cancel" onClick={() => { setShowMoveConfirm(false); setConfirmAction(null); setSingleWorkAction(null); }}>取消</button>
+              <button className={styles.deleteConfirmCancel} onClick={() => { setShowMoveConfirm(false); setConfirmAction(null); setSingleWorkAction(null); }}>取消</button>
             </div>
           </div>
         </div>

@@ -1,4 +1,5 @@
 import type { Collection } from '../../types';
+import styles from './Waterfall.module.css';
 
 interface CollectionCardProps {
   collection: Collection;
@@ -31,7 +32,7 @@ export default function CollectionCard({
 
   return (
     <div
-      className={`work-card ${isBatchMode ? 'batch-mode' : ''} ${isSelected ? 'selected' : ''} ${isDragging ? 'dragging' : ''} ${isDragOver ? 'drag-over' : ''}`}
+      className={`${styles.workCard} ${isBatchMode ? styles.batchMode : ''} ${isSelected ? styles.selected : ''} ${isDragging ? styles.dragging : ''} ${isDragOver ? styles.dragOver : ''}`}
       style={{ left: position.left, top: position.top, width: position.width }}
       onClick={e => onClick(e, collection)}
       onContextMenu={e => onContextMenu(e, collection)}
@@ -41,23 +42,23 @@ export default function CollectionCard({
       onDrop={onDrop}
       onDragEnd={onDragEnd}
     >
-      <div className={`work-cover ${isSelected ? 'selected' : ''}`}>
+      <div className={`${styles.workCover} ${isSelected ? styles.selected : ''}`}>
         {isBatchMode && (
-          <div className="select-checkbox">
-            <div className={`checkbox-inner ${isSelected ? 'checked' : ''}`}>
-              {isSelected && <span className="checkmark">✓</span>}
+          <div className={styles.selectCheckbox}>
+            <div className={`${styles.checkboxInner} ${isSelected ? styles.checked : ''}`}>
+              {isSelected && <span className={styles.checkmark}>✓</span>}
             </div>
           </div>
         )}
         {coverUrl ? (
-          <div className="cover-image-container" style={{ backgroundImage: `url(${coverUrl})`, backgroundSize: 'cover', backgroundPosition }} />
+          <div className={styles.coverImageContainer} style={{ backgroundImage: `url(${coverUrl})`, backgroundSize: 'cover', backgroundPosition }} />
         ) : (
-          <div className="no-cover">暂无封面</div>
+          <div className={styles.noCover}>暂无封面</div>
         )}
       </div>
-      <div className="work-info">
-        <p className="work-title">{collection.name}</p>
-        <p className="work-count">{workCount} 个作品</p>
+      <div className={styles.workInfo}>
+        <p className={styles.workTitle}>{collection.name}</p>
+        <p className={styles.workCount}>{workCount} 个作品</p>
       </div>
     </div>
   );

@@ -15,33 +15,42 @@ export function registerWorkHandlers(): void {
 
       const works: any[] = [];
 
-      const scanFolder = (currentPath: string, relativePath = '') => {
-        for (const item of fs.readdirSync(currentPath)) {
+      const scanFolder = async (currentPath: string, relativePath = '') => {
+        const items = await fs.promises.readdir(currentPath);
+        const subDirs: Promise<void>[] = [];
+
+        for (const item of items) {
           const itemPath = path.join(currentPath, item);
-          if (!fs.statSync(itemPath).isDirectory()) continue;
+          let stat;
+          try {
+            stat = await fs.promises.stat(itemPath);
+          } catch { continue; }
+          if (!stat.isDirectory()) continue;
 
           const itemRelativePath = relativePath ? `${relativePath}/${item}` : item;
           if (itemRelativePath.startsWith('collection_covers')) continue;
 
           const infoFile = path.join(itemPath, 'info.json');
-          if (fs.existsSync(infoFile)) {
-            const workData = JSON.parse(fs.readFileSync(infoFile, 'utf-8'));
+          try {
+            const rawJson = await fs.promises.readFile(infoFile, 'utf-8');
+            const workData = JSON.parse(rawJson);
             if (workData.images?.length > 0) {
-              if (!workData.cover) {
-                workData.cover = getImageURL(`image/${itemRelativePath}/${workData.images[0]}`);
-              }
+              // Always regenerate cover from actual disk path
+              workData.cover = getImageURL(`image/${itemRelativePath}/${workData.images[0]}`);
               workData.fileName = `${itemRelativePath}/${workData.images[0]}`;
             }
             workData.id = itemRelativePath;
             workData.folder = itemRelativePath;
             works.push(workData);
-          }
+          } catch { /* no info.json in this dir */ }
 
-          scanFolder(itemPath, itemRelativePath);
+          subDirs.push(scanFolder(itemPath, itemRelativePath));
         }
+
+        await Promise.all(subDirs);
       };
 
-      scanFolder(imagePath);
+      await scanFolder(imagePath);
       return { success: true, works };
     } catch (error: any) {
       console.error('read-works error:', error);
@@ -76,10 +85,15 @@ export function registerWorkHandlers(): void {
         workData = JSON.parse(fs.readFileSync(infoFilePath, 'utf-8'));
         workData.fileName = cleanFileName;
 
+        // Overwrite folder with actual disk path (consistent with read-works)
+        const actualFolder = pathParts.length > 1 ? pathParts.slice(0, -1).join('/') : cleanFileName.replace(/\.[^/.]+$/, '');
+        workData.folder = actualFolder;
+
         if (!workData.id) {
-          workData.id = pathParts.length > 1 ? pathParts.slice(0, -1).join('/') : cleanFileName.replace(/\.[^/.]+$/, '');
+          workData.id = actualFolder;
         }
-        if (!workData.cover && workData.images?.length > 0) {
+        // Always regenerate cover from actual disk path
+        if (workData.images?.length > 0) {
           const firstImage = workData.images[0];
           const folderPath = cleanFileName.includes('/') ? cleanFileName.substring(0, cleanFileName.lastIndexOf('/')) : '';
           workData.cover = folderPath
@@ -119,6 +133,8 @@ export function registerWorkHandlers(): void {
         if (fs.existsSync(folderPath) && fs.statSync(folderPath).isDirectory()) {
           deleteFolderContent(folderPath);
           if (fs.existsSync(folderPath)) fs.rmdirSync(folderPath);
+        } else {
+          return { success: false, error: `作品文件夹不存在: ${workId}` };
         }
       } else if (workId) {
         const imageDir = path.join(appRootPath, 'image');
@@ -162,7 +178,8 @@ export function registerWorkHandlers(): void {
         if (filename?.includes('info.json')) {
           const win = getMainWindow();
           if (win?.webContents) {
-            win.webContents.send('works-changed');
+            // Send the changed path so frontend can do incremental update
+            win.webContents.send('works-changed', filename);
           }
         }
       });
@@ -190,7 +207,7 @@ export function restartFileWatcher(): void {
     if (filename?.includes('info.json')) {
       const win = getMainWindow();
       if (win?.webContents) {
-        win.webContents.send('works-changed');
+        win.webContents.send('works-changed', filename);
       }
     }
   });

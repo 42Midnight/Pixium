@@ -1,0 +1,54 @@
+.favoritesPage {
+  min-height: 100vh;
+  background-color: var(--bg-root);
+}
+
+.favoritesContainer {
+  max-width: 1600px;
+  margin: 80px auto 0 auto;
+  padding: 20px;
+  background-color: var(--bg-root);
+  min-height: calc(100vh - 80px);
+}
+
+.favoritesGrid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 20px;
+}
+
+@media (max-width: 1400px) {
+  .favoritesGrid { grid-template-columns: repeat(5, 1fr); }
+}
+@media (max-width: 1200px) {
+  .favoritesGrid { grid-template-columns: repeat(4, 1fr); }
+}
+@media (max-width: 900px) {
+  .favoritesGrid { grid-template-columns: repeat(3, 1fr); }
+}
+@media (max-width: 600px) {
+  .favoritesGrid { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 400px) {
+  .favoritesGrid { grid-template-columns: 1fr; }
+}
+
+.favoritesWorkCard {
+  position: static !important;
+}
+
+.favoritesEmpty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  color: var(--text-tertiary);
+  font-size: var(--text-xl);
+}
+
+.favoritesEmptyHint {
+  margin-top: 8px;
+  font-size: var(--text-base);
+  color: var(--text-muted);
+}

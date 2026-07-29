@@ -25,4 +25,5 @@ export interface WorkData {
   coverPosition?: number;
   coverPositionVertical?: boolean;
   collectionId?: string;
+  tags?: string[];
 }

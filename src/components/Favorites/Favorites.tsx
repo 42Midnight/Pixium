@@ -8,7 +8,7 @@ import TitleBar from '../common/TitleBar';
 import ContextMenu from '../common/ContextMenu';
 import WorkCard from '../WaterFall/WorkCard';
 import type { WorkData } from '../../types';
-import './Favorites.css';
+import styles from './Favorites.module.css';
 
 export default function Favorites() {
   const navigate = useNavigate();
@@ -42,16 +42,16 @@ export default function Favorites() {
   };
 
   return (
-    <div className="favorites-page">
+    <div className={styles.favoritesPage}>
       <TitleBar title="喜欢" onBack={goBack} />
-      <div className="favorites-container">
+      <div className={styles.favoritesContainer}>
         {favoriteWorks.length === 0 ? (
-          <div className="favorites-empty">
+          <div className={styles.favoritesEmpty}>
             <p>还没有喜欢任何作品</p>
-            <p className="favorites-empty-hint">在作品卡片上点击心形图标即可喜欢</p>
+            <p className={styles.favoritesEmptyHint}>在作品卡片上点击心形图标即可喜欢</p>
           </div>
         ) : (
-          <div className="favorites-grid">
+          <div className={styles.favoritesGrid}>
             {favoriteWorks.map(work => (
               <WorkCard
                 key={work.id}
@@ -59,6 +59,7 @@ export default function Favorites() {
                 isSelected={false}
                 isBatchMode={false}
                 useAbsolutePosition={false}
+                className={styles.favoritesWorkCard}
                 onClick={handleCardClick}
                 onContextMenu={(e, w) => { e.preventDefault(); e.stopPropagation(); setWorkContextMenu({ x: e.clientX, y: e.clientY, work: w }); }}
                 isFavorite={isFavorite(work.id)}

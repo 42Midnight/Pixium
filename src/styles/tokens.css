@@ -1,0 +1,72 @@
+:root {
+  /* Background layers */
+  --bg-root: #121212;
+  --bg-surface: #1a1a1a;
+  --bg-elevated: #1e1e1e;
+  --bg-sidebar: #252525;
+  --bg-hover: rgba(255, 255, 255, 0.05);
+  --bg-overlay: rgba(0, 0, 0, 0.7);
+
+  /* Input backgrounds */
+  --bg-input: #222;
+  --bg-input-alt: #333;
+
+  /* Borders */
+  --border-default: #333;
+  --border-input: #444;
+  --border-focus: #555;
+
+  /* Brand colors */
+  --color-success: #4caf50;
+  --color-success-hover: #43a047;
+  --color-success-dark: #388e3c;
+  --color-info: #2196f3;
+  --color-info-hover: #1976d2;
+  --color-accent: #4a9eff;
+  --color-accent-hover: #007acc;
+  --color-danger: #f44336;
+  --color-danger-hover: #d32f2f;
+  --color-warning: #ff9800;
+  --color-warning-hover: #f57c00;
+
+  /* Text */
+  --text-primary: #fff;
+  --text-secondary: #ccc;
+  --text-tertiary: #888;
+  --text-muted: #666;
+
+  /* Glass buttons */
+  --btn-glass: rgba(255, 255, 255, 0.1);
+  --btn-glass-hover: rgba(255, 255, 255, 0.2);
+
+  /* Spacing */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+
+  /* Radii */
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --radius-xl: 12px;
+
+  /* Transitions */
+  --transition-fast: 0.15s ease;
+  --transition-default: 0.2s ease;
+
+  /* Font sizes */
+  --text-xs: 11px;
+  --text-sm: 13px;
+  --text-base: 14px;
+  --text-md: 15px;
+  --text-lg: 16px;
+  --text-xl: 18px;
+  --text-2xl: 22px;
+
+  /* Layout */
+  --navbar-height: 60px;
+}

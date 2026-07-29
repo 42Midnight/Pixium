@@ -1,5 +1,3 @@
-export type CollectionMode = 'pixiv' | 'album';
-
 export interface Collection {
   id: string;
   name: string;
@@ -8,7 +6,6 @@ export interface Collection {
   coverPosition?: number;
   coverPositionVertical?: boolean;
   images: string[];
-  mode: CollectionMode;
   createdAt?: {
     year: number;
     month: number;

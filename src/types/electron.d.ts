@@ -21,10 +21,12 @@ export interface ElectronAPI {
   readSettings: () => Promise<{ success: boolean; data: { newCollectionPosition: string }; error?: string }>;
   saveSettings: (settings: Record<string, unknown>) => Promise<{ success: boolean; error?: string }>;
   startWatchWorks: () => Promise<{ success: boolean; error?: string }>;
-  onWorksChanged: (callback: () => void) => () => void;
+  onWorksChanged: (callback: (filename?: string) => void) => () => void;
   selectFolder: () => Promise<{ success: boolean; path?: string; error?: string }>;
   downloadImage: (workId: string, targetPath: string) => Promise<{ success: boolean; path?: string; count?: number; error?: string }>;
   downloadCollectionImages: (collectionFolder: string, targetPath: string, imagePaths: string[]) => Promise<{ success: boolean; count?: number; error?: string }>;
+  exportData: (targetPath: string) => Promise<{ success: boolean; error?: string }>;
+  importData: (sourcePath: string) => Promise<{ success: boolean; error?: string }>;
   saveImageAs: (imagePath: string) => Promise<{ success: boolean; path?: string; error?: string }>;
   downloadSingleImage: (imagePath: string, targetPath: string, fileName: string) => Promise<{ success: boolean; path?: string; error?: string }>;
   getImageURL: (relativePath: string) => Promise<{ success: boolean; url?: string; error?: string }>;

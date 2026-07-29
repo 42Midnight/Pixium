@@ -7,8 +7,9 @@ import TitleBar from '../common/TitleBar';
 import ConfirmDialog from '../common/ConfirmDialog';
 import ImageViewer from './ImageViewer';
 import PromptCard from './PromptCard';
+import { tagColor } from '../common/TagInput';
 import type { WorkData } from '../../types';
-import './Detail.css';
+import styles from './Detail.module.css';
 
 export default function Detail() {
   const { fileName } = useParams<{ fileName: string }>();
@@ -25,7 +26,6 @@ export default function Detail() {
   const [isDeleting, setIsDeleting] = useState(false);
   const [selectedFields, setSelectedFields] = useState<string[]>([]);
   const [isMultiSelectMode, setIsMultiSelectMode] = useState(false);
-  const [collectionMode, setCollectionMode] = useState<string>('pixiv');
   const [isDownloading, setIsDownloading] = useState(false);
 
   const collectionFolder = location.state?.collectionFolder as string | undefined;
@@ -51,13 +51,6 @@ export default function Detail() {
         const result = await window.electronAPI!.readWorkDetail(decodedFileName);
         if (result.success && result.workData) {
           setWorkData(result.workData);
-          if (location.state?.collectionFolder) {
-            const collResult = await window.electronAPI!.readCollections();
-            if (collResult.success) {
-              const coll = (collResult.data.collections || []).find(c => c.folder === location.state?.collectionFolder);
-              if (coll) setCollectionMode(coll.mode || 'pixiv');
-            }
-          }
         } else {
           alert('加载作品详情失败: ' + (result.error || ''));
           goBack();
@@ -101,7 +94,7 @@ export default function Detail() {
     if (!workData) return;
     setIsDeleting(true);
     try {
-      const deleteId = workData.folder || workData.id;
+      const deleteId = workData.id;
       if (isElectronAvailable() && deleteId) {
         await window.electronAPI!.deleteFiles(deleteId);
         const collResult = await window.electronAPI!.readCollections();
@@ -152,18 +145,20 @@ export default function Detail() {
   }, [workData, settings.downloadPath]);
 
   if (!workData) {
-    return <div className="detail-loading"><p>加载中...</p></div>;
+    return <div className={styles.detailLoading}><p>加载中...</p></div>;
   }
 
+  const hasPrompt = workData.prompt && Object.keys(workData.prompt).length > 0;
+
   return (
-    <div className="detail-container">
+    <div className={styles.detailContainer}>
       <TitleBar title={workData.title} onBack={goBack} />
-      <div className="detail-header-fixed">
+      <div className={styles.detailHeaderFixed}>
 
       {/* Row 2: edit + copy controls right-aligned */}
-      <div className="detail-subbar">
+      <div className={styles.detailSubbar}>
         <button
-          className={`detail-fav-btn ${isFavorite(workData.id) ? 'favorited' : ''}`}
+          className={`${styles.detailFavBtn} ${isFavorite(workData.id) ? styles.favorited : ''}`}
           onClick={() => toggleFavorite(workData.id)}
           title={isFavorite(workData.id) ? '取消喜欢' : '喜欢'}
         >
@@ -175,20 +170,20 @@ export default function Detail() {
           onClick={() => navigate('/upload', { state: { editMode: true, workData, collectionId: location.state?.collectionId, collectionFolder, previousPath } })}>
           编辑
         </button>
-        {collectionMode === 'pixiv' && workData.prompt && (
+        {hasPrompt && (
           <>
             {copiedSelected ? (
-              <button className="copy-selected-button copied">已复制选中</button>
+              <button className={`${styles.copySelectedButton} ${styles.copied}`}>已复制选中</button>
             ) : isMultiSelectMode ? (
               selectedFields.length > 0 ? (
-                <button className="copy-selected-button" onClick={handleCopySelected}>复制选中 ({selectedFields.length})</button>
+                <button className={styles.copySelectedButton} onClick={handleCopySelected}>复制选中 ({selectedFields.length})</button>
               ) : (
-                <button className="copy-selected-button" onClick={() => setIsMultiSelectMode(false)}>取消多选</button>
+                <button className={styles.copySelectedButton} onClick={() => setIsMultiSelectMode(false)}>取消多选</button>
               )
             ) : (
-              <button className="copy-selected-button" onClick={() => setIsMultiSelectMode(true)}>多选</button>
+              <button className={styles.copySelectedButton} onClick={() => setIsMultiSelectMode(true)}>多选</button>
             )}
-            <button className={`copy-all-button ${copiedAll ? 'copied' : ''}`} onClick={handleCopyAll}>
+            <button className={`${styles.copyAllButton} ${copiedAll ? styles.copied : ''}`} onClick={handleCopyAll}>
               {copiedAll ? '已复制全部' : '复制全部'}
             </button>
           </>
@@ -196,8 +191,8 @@ export default function Detail() {
       </div>
       </div>
 
-      <div className="detail-content">
-        <div className="detail-left">
+      <div className={styles.detailContent}>
+        <div className={styles.detailLeft}>
           <ImageViewer
             images={workData.images}
             title={workData.title}
@@ -206,37 +201,49 @@ export default function Detail() {
             downloadPath={settings.downloadPath}
             showFilename={settings.showImageFilename}
           />
-          <div className="detail-info">
-            <button className="saveas-button" onClick={handleSaveAs}>另存为</button>
-            <button className="download-button" onClick={handleDownload} disabled={isDownloading}>
+          {!hasPrompt && workData.tags && workData.tags.length > 0 && (
+            <div className={styles.detailTagsRow}>
+              {workData.tags.map(tag => (
+                <span key={tag} className={styles.detailTagPill} style={{ backgroundColor: tagColor(tag) }}>
+                  {tag}
+                </span>
+              ))}
+            </div>
+          )}
+          <div className={styles.detailInfo}>
+            <button className={styles.saveasButton} onClick={handleSaveAs}>另存为</button>
+            <button className={styles.downloadButton} onClick={handleDownload} disabled={isDownloading}>
               {isDownloading ? '下载中...' : '下载图片'}
             </button>
-            <button className="delete-button" onClick={() => setShowDeleteConfirm(true)}>删除作品</button>
+            <button className={styles.deleteButton} onClick={() => setShowDeleteConfirm(true)}>删除作品</button>
           </div>
         </div>
 
-        {collectionMode === 'pixiv' && (
-          <div className="detail-right">
-            {workData.prompt ? (
-              <div className="prompt-list">
-                {Object.entries(workData.prompt).map(([fieldName, fieldValue]) => (
-                  <PromptCard
-                    key={fieldName}
-                    fieldName={fieldName}
-                    fieldValue={fieldValue}
-                    isSelected={selectedFields.includes(fieldName)}
-                    isMultiSelectMode={isMultiSelectMode}
-                    onToggleSelect={handleToggleSelect}
-                    onCopy={handleCopy}
-                    copiedField={copiedField}
-                  />
+        {hasPrompt && (
+          <div className={styles.detailRight}>
+            {workData.tags && workData.tags.length > 0 && (
+              <div className={styles.detailTagsRow}>
+                {workData.tags.map(tag => (
+                  <span key={tag} className={styles.detailTagPill} style={{ backgroundColor: tagColor(tag) }}>
+                    {tag}
+                  </span>
                 ))}
               </div>
-            ) : (
-              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '40px 20px' }}>
-                <p style={{ color: 'rgba(255,255,255,0.5)' }}>暂无文本内容</p>
-              </div>
             )}
+            <div className={styles.promptList}>
+              {Object.entries(workData.prompt!).map(([fieldName, fieldValue]) => (
+                <PromptCard
+                  key={fieldName}
+                  fieldName={fieldName}
+                  fieldValue={fieldValue}
+                  isSelected={selectedFields.includes(fieldName)}
+                  isMultiSelectMode={isMultiSelectMode}
+                  onToggleSelect={handleToggleSelect}
+                  onCopy={handleCopy}
+                  copiedField={copiedField}
+                />
+              ))}
+            </div>
           </div>
         )}
       </div>

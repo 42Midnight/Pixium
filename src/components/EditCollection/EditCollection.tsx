@@ -5,7 +5,7 @@ import TitleBar from '../common/TitleBar';
 import { fileToBuffer, sanitizeFolderName } from '../../utils/file';
 import { isElectronAvailable } from '../../services/electron';
 import type { Collection } from '../../types';
-import '../CreateCollection/CreateCollection.css';
+import styles from '../CreateCollection/CreateCollection.module.css';
 
 export default function EditCollection() {
   const navigate = useNavigate();
@@ -133,44 +133,44 @@ export default function EditCollection() {
   };
 
   return (
-    <div className="create-collection-container">
+    <div className={styles.createCollectionContainer}>
       <TitleBar title="编辑相册" onBack={() => navigate('/')} />
 
-        <form className="create-collection-form" onSubmit={handleSubmit}>
-          <div className="create-collection-left">
-            <div className="title-input-section">
-              <label className="input-label">相册名称</label>
-              <input type="text" value={title} onChange={e => setTitle(e.target.value)} placeholder="请输入相册名称" className="title-input" required spellCheck={false} />
+        <form className={styles.createCollectionForm} onSubmit={handleSubmit}>
+          <div className={styles.createCollectionLeft}>
+            <div className={styles.titleInputSection}>
+              <label className={styles.inputLabel}>相册名称</label>
+              <input type="text" value={title} onChange={e => setTitle(e.target.value)} placeholder="请输入相册名称" className={styles.titleInput} required spellCheck={false} />
             </div>
-            <div className="cover-upload-section">
-              <h3 className="section-title">封面图片</h3>
+            <div className={styles.coverUploadSection}>
+              <h3 className={styles.sectionTitle}>封面图片</h3>
               <div
-                className={`cover-upload-area ${isDragging ? 'dragging' : ''}`}
+                className={`${styles.coverUploadArea} ${isDragging ? styles.dragging : ''}`}
                 onDragEnter={e => { e.preventDefault(); setIsDragging(true); }}
                 onDragLeave={e => { e.preventDefault(); setIsDragging(false); }}
                 onDragOver={e => e.preventDefault()}
                 onDrop={handleDrop}
               >
                 {imagePreview ? (
-                  <div className="cover-preview-wrapper">
-                    <div className="cover-preview" style={{ backgroundImage: `url(${imagePreview})`, backgroundSize: 'cover', backgroundPosition: `${coverPosition}% 50%` }} />
-                    <button type="button" className="remove-cover-btn" onClick={() => { setSelectedFile(null); setImagePreview(null); setCoverDeleted(true); }}>×</button>
-                    <button type="button" className="cover-adjust-btn" onClick={() => setIsAdjustingCover(true)}>手动调整</button>
+                  <div className={styles.coverPreviewWrapper}>
+                    <div className={styles.coverPreview} style={{ backgroundImage: `url(${imagePreview})`, backgroundSize: 'cover', backgroundPosition: `${coverPosition}% 50%` }} />
+                    <button type="button" className={styles.removeCoverBtn} onClick={() => { setSelectedFile(null); setImagePreview(null); setCoverDeleted(true); }}>×</button>
+                    <button type="button" className={styles.coverAdjustBtn} onClick={() => setIsAdjustingCover(true)}>手动调整</button>
                   </div>
                 ) : (
-                  <label className="cover-upload-label">
-                    <input type="file" accept="image/*" onChange={handleFileChange} className="cover-upload-input" />
-                    <div className="upload-placeholder">
-                      <span className="upload-icon">+</span>
-                      <span className="upload-text">{isDragging ? '松开鼠标上传封面' : '点击或拖拽封面图片到此处'}</span>
+                  <label className={styles.coverUploadLabel}>
+                    <input type="file" accept="image/*" onChange={handleFileChange} className={styles.coverUploadInput} />
+                    <div className={styles.uploadPlaceholder}>
+                      <span className={styles.uploadIcon}>+</span>
+                      <span className={styles.uploadText}>{isDragging ? '松开鼠标上传封面' : '点击或拖拽封面图片到此处'}</span>
                     </div>
                   </label>
                 )}
               </div>
             </div>
           </div>
-          <div className="create-collection-footer">
-            <button type="submit" className="submit-btn" disabled={isSaving || !title.trim()}>
+          <div className={styles.createCollectionFooter}>
+            <button type="submit" className={styles.submitBtn} disabled={isSaving || !title.trim()}>
               {isSaving ? '确定中...' : '确定'}
             </button>
           </div>

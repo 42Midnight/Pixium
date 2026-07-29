@@ -3,13 +3,16 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { useSettings } from '../../hooks/useSettings';
 import { useCollections } from '../../hooks/useCollections';
 import { fileToBuffer, sanitizeFolderName } from '../../utils/file';
+import { extractPromptFromPNG } from '../../utils/pngMetadata';
 import { getNow } from '../../utils/format';
+import { ALL_WORKS_ID, UNCATEGORIZED_FOLDER } from '../../utils/constants';
 import CoverAdjustModal from '../common/CoverAdjustModal';
 import ImagePreview from './ImagePreview';
 import PromptEditor from './PromptEditor';
+import TagInput from '../common/TagInput';
 import TitleBar from '../common/TitleBar';
-import type { CollectionMode, TemplateField, WorkData } from '../../types';
-import './Upload.css';
+import type { TemplateField, WorkData } from '../../types';
+import styles from './Upload.module.css';
 
 export default function Upload() {
   const navigate = useNavigate();
@@ -19,19 +22,20 @@ export default function Upload() {
 
   const editMode = location.state?.editMode === true;
   const editWorkData = location.state?.workData as WorkData | undefined;
+  const isAllWorks = location.state?.isAllWorks === true;
 
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [previewImages, setPreviewImages] = useState<string[]>([]);
-  const [title, setTitle] = useState(editWorkData?.title || '');
+  const [title, setTitle] = useState((editWorkData?.title || '').trim().replace(/\s+/g, '_'));
   const [promptFields, setPromptFields] = useState<TemplateField[]>([{ name: '', value: '' }]);
   const [isSaving, setIsSaving] = useState(false);
   const [selectedCollection, setSelectedCollection] = useState<string | null>(null);
-  const [collectionMode, setCollectionMode] = useState<CollectionMode>('pixiv');
   const [batchImport, setBatchImport] = useState(false);
   const [coverPosition, setCoverPosition] = useState(editWorkData?.coverPosition ?? 50);
   const [coverPositionVertical, setCoverPositionVertical] = useState(editWorkData?.coverPositionVertical ?? false);
   const [isAdjustingCover, setIsAdjustingCover] = useState(false);
   const [originalFolder, setOriginalFolder] = useState<string | null>(editWorkData?.folder || null);
+  const [tags, setTags] = useState<string[]>(editWorkData?.tags || []);
   const [isDragging, setIsDragging] = useState(false);
   const [draggingImage, setDraggingImage] = useState<string | null>(null);
   const [dragOverIndex, setDragOverIndex] = useState(-1);
@@ -43,6 +47,10 @@ export default function Upload() {
   // Set initial collection from route state (locked - cannot be changed)
   useEffect(() => {
     if (!selectedCollection) {
+      if (isAllWorks) {
+        setSelectedCollection(ALL_WORKS_ID);
+        return;
+      }
       const collId = location.state?.collectionId || editWorkData?.collectionId;
       if (collId) {
         setSelectedCollection(collId);
@@ -54,7 +62,7 @@ export default function Upload() {
         }
       }
     }
-  }, [location.state, editWorkData, selectedCollection, collections]);
+  }, [location.state, editWorkData, selectedCollection, collections, isAllWorks]);
 
   // Load edit data (only once)
   useEffect(() => {
@@ -92,13 +100,37 @@ export default function Upload() {
       setPreviewImages(urls);
     }
     if (editWorkData.folder) setOriginalFolder(editWorkData.folder);
+    if (editWorkData.tags) setTags(editWorkData.tags);
   }, [editMode, editWorkData]);
 
-  // Update collection mode when selection changes
-  const currentCollection = collections.find(c => c.id === selectedCollection);
+  // 判断 promptFields 是否实质上为空（用户未输入任何提示词）
+  const isPromptEmpty = (fields: TemplateField[]): boolean =>
+    fields.every(f => !f.name.trim() && !f.value.trim());
+
+  // 自动从 PNG 图片中提取 AI 生成提示词元信息
   useEffect(() => {
-    if (currentCollection) setCollectionMode(currentCollection.mode || 'pixiv');
-  }, [currentCollection]);
+    if (!selectedFiles.length) return;
+    if (!isPromptEmpty(promptFields)) return; // 用户已手动输入，跳过自动提取
+    const pngFile = selectedFiles.find(
+      f => f.type === 'image/png' || f.name.toLowerCase().endsWith('.png')
+    );
+    if (!pngFile) return;
+
+    let cancelled = false;
+    extractPromptFromPNG(pngFile).then(promptText => {
+      if (cancelled || !promptText) return;
+      // 以换行符分割正面提示词，过滤纯空行，每行作为一个键值对的 value
+      const lines = promptText.split('\n').filter(line => line.trim());
+      if (!lines.length) return;
+      setPromptFields(lines.map(value => ({ name: '', value: value.trim() })));
+    }).catch(() => {
+      // 静默处理错误，不影响用户上传流程
+    });
+
+    return () => { cancelled = true; };
+  }, [selectedFiles]);
+
+  const currentCollection = collections.find(c => c.id === selectedCollection);
 
   // Handle files
   const handleFiles = useCallback((files: File[], append = false) => {
@@ -192,20 +224,22 @@ export default function Upload() {
         return;
       }
     }
-    if (collectionFolder) {
+    if (isAllWorks) {
+      navigate(`/${ALL_WORKS_ID}`);
+    } else if (collectionFolder) {
       navigate(`/${collectionFolder}`);
     } else {
       navigate('/');
     }
-  }, [editMode, originalFolder, editWorkData, navigate, collectionFolder]);
+  }, [editMode, originalFolder, editWorkData, navigate, collectionFolder, isAllWorks]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!collections.length) { alert('请先添加相册'); return; }
+    if (!collections.length && !isAllWorks) { alert('请先添加相册'); return; }
     if (!selectedCollection) { alert('未找到所属相册'); return; }
 
     const api = window.electronAPI;
-    const collectionFolder = currentCollection?.folder || '';
+    const collectionFolder = isAllWorks ? UNCATEGORIZED_FOLDER : (currentCollection?.folder || location.state?.collectionFolder || UNCATEGORIZED_FOLDER);
     const workFolderName = title ? sanitizeFolderName(title) : (selectedFiles[0]?.name.replace(/\.[^/.]+$/, '') || `upload_${Date.now()}`).replace(/[<>:"/\\|?*]/g, '_');
 
     // Check for duplicate in non-edit, non-batch mode
@@ -223,9 +257,7 @@ export default function Upload() {
     setIsSaving(true);
     try {
       const prompt: Record<string, string> = {};
-      if (collectionMode === 'pixiv') {
-        promptFields.forEach(f => { if (f.name && f.value) prompt[f.name] = f.value; });
-      }
+      promptFields.forEach(f => { if (f.name && f.value) prompt[f.name] = f.value; });
 
       let folderName: string | null = null;
       let imageFileNames: string[] = [];
@@ -247,9 +279,10 @@ export default function Upload() {
             const coverResult = await api.getImageURL(`image/${singlePath}/${file.name}`);
             const coverUrl = coverResult.success && coverResult.url ? coverResult.url : '';
             const jsonData = {
-              title: fileTitle, prompt: collectionMode === 'pixiv' ? { ...prompt } : null,
+              title: fileTitle.trim().replace(/\s+/g, '_'), prompt: Object.keys(prompt).length > 0 ? { ...prompt } : null,
               images: [file.name], cover: coverUrl || undefined, folder: singlePath,
               createdAt: getNow(), coverPosition, coverPositionVertical,
+              tags: tags.length > 0 ? [...tags] : undefined,
             };
             const encoder = new TextEncoder();
             await api.saveImage(`${singlePath}/info.json`, Array.from(encoder.encode(JSON.stringify(jsonData, null, 2))));
@@ -346,21 +379,22 @@ export default function Upload() {
             if (urlResult.success && urlResult.url) coverUrl = urlResult.url;
           }
           const jsonData = {
-            title: title || workFolderName,
+            title: (title || workFolderName).trim().replace(/\s+/g, '_'),
             prompt: Object.keys(prompt).length > 0 ? prompt : null,
             images: imageFileNames,
             cover: coverUrl || undefined,
             folder: folderName,
             createdAt: editMode ? editWorkData?.createdAt || getNow() : getNow(),
             coverPosition, coverPositionVertical,
+            tags: tags.length > 0 ? tags : undefined,
           };
           const encoder = new TextEncoder();
           await api.saveImage(`${folderName}/info.json`, Array.from(encoder.encode(JSON.stringify(jsonData, null, 2))));
         }
       }
 
-      // Add to collection (non-edit mode)
-      if (!editMode && selectedCollection && api) {
+      // Add to collection (non-edit mode, skip for all-works)
+      if (!editMode && selectedCollection && selectedCollection !== ALL_WORKS_ID && api) {
         const result = await api.readCollections();
         if (result.success) {
           const updated = (result.data.collections || []).map(c =>
@@ -418,28 +452,34 @@ export default function Upload() {
   }, [draggingImage]);
 
   return (
-    <div className="upload-container">
+    <div className={styles.uploadContainer}>
       <TitleBar title={editMode ? '编辑作品' : '上传作品'} onBack={goBack} />
 
-      <form className="upload-form" onSubmit={handleSubmit}>
-        <div className="upload-left">
+      <form className={styles.uploadForm} onSubmit={handleSubmit}>
+        <div className={styles.uploadLeft}>
           {!batchImport && (
-            <div className="title-input-section">
-              <label className="input-label">标题</label>
+            <div className={styles.titleInputSection}>
+              <label className={styles.inputLabel}>标题</label>
               <input type="text" value={title} onChange={e => setTitle(e.target.value)}
-                placeholder="请输入标题（可选，默认为文件名）" className="title-input" spellCheck={false} />
+                onBlur={() => setTitle(t => t.trim().replace(/\s+/g, '_'))}
+                placeholder="请输入标题（可选，默认为文件名）" className={styles.titleInput} spellCheck={false} />
             </div>
           )}
 
+          <div className={styles.tagInputSection}>
+            <label className={styles.inputLabel}>标签</label>
+            <TagInput tags={tags} onChange={setTags} placeholder="输入标签，按回车添加" />
+          </div>
+
           {!editMode && (
-            <div className="batch-import-section">
-              <label className="input-label">导入方式</label>
-              <div className="import-options">
-                <label className={`import-option ${!batchImport ? 'selected' : ''}`}>
+            <div className={styles.batchImportSection}>
+              <label className={styles.inputLabel}>导入方式</label>
+              <div className={styles.importOptions}>
+                <label className={`${styles.importOption} ${!batchImport ? styles.selected : ''}`}>
                   <input type="radio" name="importMode" checked={!batchImport} onChange={() => setBatchImport(false)} />
                   <span>合并为一个作品</span>
                 </label>
-                <label className={`import-option ${batchImport ? 'selected' : ''}`}>
+                <label className={`${styles.importOption} ${batchImport ? styles.selected : ''}`}>
                   <input type="radio" name="importMode" checked={batchImport} onChange={() => setBatchImport(true)} />
                   <span>批量导入（每张图片单独一个作品）</span>
                 </label>
@@ -447,14 +487,14 @@ export default function Upload() {
             </div>
           )}
 
-          <div className="image-upload-container">
-            <div className={`image-upload-area ${isDragging ? 'dragging' : ''}`}
+          <div className={styles.imageUploadContainer}>
+            <div className={`${styles.imageUploadArea} ${isDragging ? styles.dragging : ''}`}
               onDragEnter={e => { e.preventDefault(); setIsDragging(true); }}
               onDragLeave={e => { e.preventDefault(); setIsDragging(false); }}
               onDragOver={e => e.preventDefault()}
               onDrop={handleDrop}
               onClick={() => document.getElementById('file-input')?.click()}>
-              <input id="file-input" type="file" multiple accept="image/*" onChange={handleFileSelect} className="file-input" />
+              <input id="file-input" type="file" multiple accept="image/*" onChange={handleFileSelect} className={styles.fileInput} />
               <ImagePreview
                 previewImages={previewImages} selectedFiles={selectedFiles}
                 draggingImage={draggingImage} dragOverIndex={dragOverIndex}
@@ -464,13 +504,13 @@ export default function Upload() {
           </div>
 
           {!batchImport && previewImages.length > 0 && (
-            <div className="cover-preview-section">
-              <div className="cover-preview-header"><span className="cover-title">封面预览</span></div>
-              <div className="cover-adjust-container">
-                <button type="button" className="cover-adjust-btn" onClick={() => setIsAdjustingCover(true)}>手动调整</button>
+            <div className={styles.coverPreviewSection}>
+              <div className={styles.coverPreviewHeader}><span className={styles.coverTitle}>封面预览</span></div>
+              <div className={styles.coverAdjustContainer}>
+                <button type="button" className={styles.coverAdjustBtn} onClick={() => setIsAdjustingCover(true)}>手动调整</button>
               </div>
-              <div className="cover-preview-container">
-                <div className="cover-preview" style={{
+              <div className={styles.coverPreviewContainer}>
+                <div className={styles.coverPreview} style={{
                   backgroundImage: `url(${displayImages[0]})`,
                   backgroundSize: 'cover',
                   backgroundPosition: coverPositionVertical ? `50% ${coverPosition}%` : `${coverPosition}% 50%`,
@@ -486,14 +526,12 @@ export default function Upload() {
           )}
         </div>
 
-        {collectionMode === 'pixiv' && (
-          <div className="upload-right">
-            <PromptEditor fields={promptFields} onChange={setPromptFields} />
-          </div>
-        )}
+        <div className={styles.uploadRight}>
+          <PromptEditor fields={promptFields} onChange={setPromptFields} />
+        </div>
 
-        <div className="upload-footer">
-          <button type="submit" className="submit-button" disabled={isSaving || (selectedFiles.length === 0 && previewImages.length === 0)}>
+        <div className={styles.uploadFooter}>
+          <button type="submit" className={styles.submitButton} disabled={isSaving || (selectedFiles.length === 0 && previewImages.length === 0)}>
             {isSaving ? '保存中...' : '确定'}
           </button>
         </div>

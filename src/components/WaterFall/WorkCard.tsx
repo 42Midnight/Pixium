@@ -1,5 +1,6 @@
 import { memo, useRef, useState, useEffect } from 'react';
 import type { WorkData } from '../../types';
+import styles from './Waterfall.module.css';
 
 interface WorkCardProps {
   work: WorkData;
@@ -7,6 +8,7 @@ interface WorkCardProps {
   isSelected: boolean;
   isBatchMode: boolean;
   useAbsolutePosition?: boolean;
+  className?: string;
   onClick: (e: React.MouseEvent, work: WorkData) => void;
   onContextMenu: (e: React.MouseEvent, work: WorkData) => void;
   isFavorite?: boolean;
@@ -15,6 +17,7 @@ interface WorkCardProps {
 
 export default memo(function WorkCard({
   work, position, isSelected, isBatchMode, useAbsolutePosition = true,
+  className = '',
   onClick, onContextMenu,
   isFavorite = false,
   onToggleFavorite,
@@ -47,21 +50,21 @@ export default memo(function WorkCard({
   return (
     <div
       ref={cardRef}
-      className={`work-card ${isBatchMode ? 'batch-mode' : ''} ${isSelected ? 'selected' : ''}`}
+      className={`${styles.workCard} ${isBatchMode ? styles.batchMode : ''} ${isSelected ? styles.selected : ''} ${className}`}
       style={useAbsolutePosition && position ? { left: position.left, top: position.top, width: position.width } : undefined}
       onClick={e => onClick(e, work)}
       onContextMenu={e => onContextMenu(e, work)}
     >
-      <div className={`work-cover ${isSelected ? 'selected' : ''}`}>
+      <div className={`${styles.workCover} ${isSelected ? styles.selected : ''}`}>
         {isBatchMode && (
-          <div className="select-checkbox">
-            <div className={`checkbox-inner ${isSelected ? 'checked' : ''}`}>
-              {isSelected && <span className="checkmark">✓</span>}
+          <div className={styles.selectCheckbox}>
+            <div className={`${styles.checkboxInner} ${isSelected ? styles.checked : ''}`}>
+              {isSelected && <span className={styles.checkmark}>✓</span>}
             </div>
           </div>
         )}
         {work.images && work.images.length > 1 && (
-          <div className="image-count">
+          <div className={styles.imageCount}>
             <svg width="12" height="12" viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg">
               <defs>
                 <mask id={maskId}>
@@ -77,7 +80,7 @@ export default memo(function WorkCard({
           </div>
         )}
         <button
-          className={`favorite-heart-btn ${isFavorite ? 'favorited' : ''}`}
+          className={`${styles.favoriteHeartBtn} ${isFavorite ? styles.favorited : ''}`}
           onClick={e => {
             e.stopPropagation();
             onToggleFavorite?.(e, work);
@@ -89,12 +92,12 @@ export default memo(function WorkCard({
           </svg>
         </button>
         <div
-          className="cover-image-container"
+          className={styles.coverImageContainer}
           style={isVisible ? { backgroundImage: `url(${work.cover})`, backgroundSize: 'cover', backgroundPosition } : undefined}
         />
       </div>
-      <div className="work-info">
-        <p className="work-title">{work.title}</p>
+      <div className={styles.workInfo}>
+        <p className={styles.workTitle}>{work.title}</p>
       </div>
     </div>
   );

@@ -1,0 +1,1085 @@
+.waterfallPage {
+  min-height: 100vh;
+  background-color: var(--bg-root);
+}
+
+.batchMode.waterfallPage {
+  padding-bottom: 80px;
+}
+
+.topNavbar {
+  position: fixed;
+  top: 50px;
+  left: 0;
+  right: 0;
+  height: 50px;
+  background-color: rgb(31, 31, 31);
+  display: flex;
+  align-items: center;
+  padding: 0 24px;
+  z-index: 100;
+}
+
+.navbarBrand {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--color-accent);
+}
+
+.navbarSettingsBtn {
+  margin-left: auto;
+  background-color: var(--btn-glass);
+  color: var(--text-primary);
+  border: none;
+  padding: 10px 20px;
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+  font-size: var(--text-base);
+  font-weight: 500;
+  transition: background-color var(--transition-default);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.navbarSettingsBtn:hover {
+  background-color: var(--btn-glass-hover);
+}
+
+.settingsIcon {
+  font-size: var(--text-lg);
+}
+
+.navbarActionsBar {
+  position: fixed;
+  top: 60px;
+  left: 0;
+  right: 0;
+  height: 60px;
+  background-color: rgb(31, 31, 31);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+  z-index: 99;
+  gap: 16px;
+}
+
+.searchInput {
+  background-color: rgba(255, 255, 255, 0.08);
+  color: var(--text-primary);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  padding: 8px 16px;
+  border-radius: var(--radius-lg);
+  font-size: var(--text-base);
+  width: 260px;
+  outline: none;
+  transition: border-color var(--transition-default), background-color var(--transition-default);
+}
+
+.searchInput::placeholder {
+  color: rgba(255, 255, 255, 0.35);
+}
+
+.searchInput:focus {
+  border-color: rgba(255, 255, 255, 0.4);
+  background-color: rgba(255, 255, 255, 0.12);
+}
+
+.searchWrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.searchWrapper .searchInput {
+  padding-right: 32px;
+}
+
+.searchClearBtn {
+  position: absolute;
+  right: 8px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0.5;
+  transition: opacity var(--transition-fast);
+}
+
+.searchClearBtn:hover {
+  opacity: 1;
+}
+
+.searchSuggestions {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  margin-top: 4px;
+  background-color: rgb(45, 45, 45);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  z-index: 200;
+  max-height: 320px;
+  overflow-y: auto;
+}
+
+.searchSuggestionItem {
+  padding: 10px 16px;
+  color: rgba(255, 255, 255, 0.85);
+  font-size: var(--text-base);
+  cursor: pointer;
+  transition: background-color 0.1s;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+
+.suggestionText {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 1;
+  min-width: 0;
+}
+
+.suggestionField {
+  font-size: var(--text-xs);
+  color: rgba(255, 255, 255, 0.35);
+  flex-shrink: 0;
+  max-width: 80px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.searchSuggestionItem:hover {
+  background-color: var(--btn-glass);
+}
+
+.navbarActions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.navbarBatchBtn {
+  background-color: var(--btn-glass);
+  color: var(--text-primary);
+  border: none;
+  padding: 10px 20px;
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+  font-size: var(--text-base);
+  font-weight: 500;
+  transition: background-color var(--transition-default);
+  text-align: center;
+}
+
+.navbarBatchBtn:hover {
+  background-color: var(--btn-glass-hover);
+}
+
+.navbarSelectAllBtn {
+  background-color: var(--color-info);
+  color: var(--text-primary);
+  border: none;
+  padding: 10px 20px;
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+  font-size: var(--text-base);
+  font-weight: 500;
+  transition: background-color var(--transition-default);
+  min-width: 96px;
+  text-align: center;
+}
+
+.navbarSelectAllBtn:hover {
+  background-color: var(--color-info-hover);
+}
+
+.navbarCancelBtn {
+  background-color: var(--btn-glass);
+  color: var(--text-primary);
+  border: none;
+  padding: 10px 20px;
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+  font-size: var(--text-base);
+  font-weight: 500;
+  transition: background-color var(--transition-default);
+  min-width: 96px;
+  text-align: center;
+}
+
+.navbarCancelBtn:hover {
+  background-color: var(--btn-glass-hover);
+}
+
+.navbarDeleteBtn {
+  background-color: var(--color-danger);
+  color: var(--text-primary);
+  border: none;
+  padding: 10px 20px;
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+  font-size: var(--text-base);
+  font-weight: 500;
+  transition: background-color var(--transition-default);
+}
+
+.navbarDeleteBtn:hover:not(:disabled) {
+  background-color: var(--color-danger-hover);
+}
+
+.navbarDeleteBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.selectedCount {
+  color: var(--text-primary);
+  font-size: var(--text-base);
+  margin-right: 8px;
+}
+
+.navbarAddBtn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background-color: var(--color-success);
+  color: var(--text-primary);
+  border: none;
+  padding: 10px 20px;
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+  font-size: var(--text-base);
+  font-weight: 500;
+  transition: background-color var(--transition-default);
+}
+
+.navbarAddBtn:hover {
+  background-color: var(--color-success-hover);
+}
+
+.navbarAddBtn .addIcon {
+  font-size: var(--text-xl);
+  font-weight: 600;
+}
+
+.waterfallContainer {
+  max-width: 1600px;
+  margin: 130px auto 0 auto;
+  padding: 20px;
+  position: relative;
+  background-color: var(--bg-root);
+  min-height: calc(100vh - 70px);
+}
+
+.workCard {
+  position: absolute;
+  background-color: transparent;
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  cursor: pointer;
+  content-visibility: auto;
+  contain-intrinsic-size: 300px 250px;
+}
+
+.workCard:hover:not(.batchMode) {
+  transform: translateY(-4px);
+  transition: transform var(--transition-default), box-shadow var(--transition-default);
+}
+
+.workCard.batchMode {
+  cursor: default;
+}
+
+.workCard.batchMode:hover {
+  transform: none;
+}
+
+.workCard:active {
+  cursor: grabbing;
+}
+
+.workCard.dragging {
+  opacity: 0.5;
+}
+
+.workCard:not(.dragging):hover {
+  cursor: grab;
+}
+
+.workCard.selected {
+  outline: none;
+}
+
+.workCard.dragOver {
+  border: 2px dashed var(--color-info);
+  background-color: rgba(33, 150, 243, 0.1);
+}
+
+.selectCheckbox {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  z-index: 10;
+  cursor: pointer;
+}
+
+.imageCount {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 2px;
+  background-color: rgba(0, 0, 0, 0.4);
+  padding: 4px 6px;
+  border-radius: 10px;
+  color: var(--text-primary);
+  font-size: var(--text-xs);
+  font-weight: 600;
+}
+
+.imageCount svg,
+.imageCount span {
+  position: relative;
+  left: -1px;
+}
+
+.imageCount span {
+  top: -1px;
+  font-weight: 700;
+  font-size: var(--text-xs);
+}
+
+.checkboxInner {
+  width: 24px;
+  height: 24px;
+  border-radius: var(--radius-sm);
+  border: 2px solid var(--text-primary);
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--transition-default);
+}
+
+.checkboxInner.checked {
+  background-color: var(--color-success);
+  border-color: var(--color-success);
+}
+
+.checkmark {
+  color: var(--text-primary);
+  font-size: var(--text-base);
+  font-weight: bold;
+}
+
+.favoriteHeartBtn {
+  position: absolute;
+  bottom: 8px;
+  right: 8px;
+  z-index: 10;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform var(--transition-fast);
+  pointer-events: auto;
+}
+
+.favoriteHeartBtn:hover {
+  transform: scale(1.2);
+}
+
+.favoriteHeartBtn:active {
+  transform: scale(0.95);
+}
+
+.workCover {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  overflow: hidden;
+  border-radius: var(--radius-xl);
+}
+
+.workCover.selected {
+  outline: 5px solid var(--color-success);
+  outline-offset: -5px;
+}
+
+.workCover img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.coverImageContainer {
+  width: 100%;
+  height: 100%;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+
+.workInfo {
+  padding: 6px 0;
+}
+
+.workTitle {
+  font-size: var(--text-base);
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-align: center;
+}
+
+.deleteConfirmOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: var(--bg-overlay);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.deleteConfirmDialog {
+  background-color: var(--bg-elevated);
+  border-radius: var(--radius-xl);
+  padding: var(--space-8);
+  max-width: 400px;
+  width: 90%;
+  text-align: center;
+  border: 1px solid var(--border-default);
+}
+
+.deleteConfirmTitle {
+  color: var(--text-primary);
+  font-size: var(--text-2xl);
+  font-weight: 600;
+  margin: 0 0 16px 0;
+}
+
+.deleteConfirmMessage {
+  color: var(--text-secondary);
+  font-size: var(--text-md);
+  line-height: 1.6;
+  margin: 0 0 28px 0;
+}
+
+.deleteConfirmButtons {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+}
+
+.moveCollectionList {
+  max-height: 200px;
+  overflow-y: auto;
+  margin-bottom: 20px;
+}
+
+.moveCollectionItem {
+  padding: 12px 16px;
+  background-color: rgba(255, 255, 255, 0.05);
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+  color: var(--text-primary);
+  font-size: var(--text-md);
+  margin-bottom: 8px;
+  transition: background-color var(--transition-default);
+}
+
+.moveCollectionItem:hover {
+  background-color: var(--btn-glass);
+}
+
+.moveCollectionItem.selected {
+  background-color: rgba(74, 158, 255, 0.3);
+  border: 1px solid rgba(74, 158, 255, 0.5);
+}
+
+.noCollectionMessage {
+  color: var(--text-muted);
+  font-size: var(--text-base);
+  margin: 16px 0;
+}
+
+.deleteConfirmCancel {
+  background-color: var(--btn-glass);
+  color: var(--text-primary);
+  border: none;
+  padding: 10px 28px;
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+  font-size: var(--text-md);
+  font-weight: 500;
+  transition: background-color var(--transition-default);
+}
+
+.deleteConfirmCancel:hover:not(:disabled) {
+  background-color: var(--btn-glass-hover);
+}
+
+.deleteConfirmCancel:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.deleteConfirmDelete {
+  background-color: var(--color-accent);
+  color: var(--text-primary);
+  border: none;
+  padding: 10px 28px;
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+  font-size: var(--text-md);
+  font-weight: 500;
+  transition: background-color var(--transition-default);
+}
+
+.deleteConfirmDelete:hover:not(:disabled) {
+  background-color: #3a8eff;
+}
+
+.deleteConfirmDelete:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.deleteConfirmOk {
+  background-color: var(--color-danger);
+  color: var(--text-primary);
+  border: none;
+  padding: 10px 28px;
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+  font-size: var(--text-md);
+  font-weight: 500;
+  transition: background-color var(--transition-default);
+}
+
+.deleteConfirmOk:hover:not(:disabled) {
+  background-color: var(--color-danger-hover);
+}
+
+.deleteConfirmOk:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  color: var(--text-tertiary);
+  font-size: var(--text-xl);
+}
+
+.emptyState button {
+  margin-top: 20px;
+  padding: 12px 24px;
+  background-color: var(--color-success);
+  color: var(--text-primary);
+  border: none;
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+  font-size: var(--text-md);
+  transition: background-color var(--transition-default);
+}
+
+.emptyState button:hover {
+  background-color: var(--color-success-hover);
+}
+
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: var(--bg-overlay);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modalContent {
+  background-color: var(--bg-elevated);
+  border-radius: var(--radius-xl);
+  padding: var(--space-8);
+  max-width: 400px;
+  width: 90%;
+  border: 1px solid var(--border-default);
+}
+
+.modalContent h3 {
+  color: var(--text-primary);
+  font-size: 20px;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.modalContent input {
+  width: 100%;
+  padding: 12px 16px;
+  background-color: #2a2a2a;
+  border: 1px solid var(--border-input);
+  border-radius: var(--radius-lg);
+  color: var(--text-primary);
+  font-size: var(--text-md);
+  outline: none;
+  transition: border-color var(--transition-default);
+}
+
+.modalContent input:focus {
+  border-color: var(--color-success);
+}
+
+.modalContent input::placeholder {
+  color: var(--text-muted);
+}
+
+.modalButtons {
+  display: flex;
+  gap: 12px;
+  margin-top: var(--space-6);
+  justify-content: flex-end;
+}
+
+.modalButtons button {
+  padding: 10px 24px;
+  border-radius: var(--radius-lg);
+  font-size: var(--text-md);
+  cursor: pointer;
+  transition: background-color var(--transition-default);
+}
+
+.modalButtons button:first-child {
+  background-color: var(--btn-glass);
+  color: var(--text-primary);
+  border: none;
+}
+
+.modalButtons button:first-child:hover {
+  background-color: var(--btn-glass-hover);
+}
+
+.modalButtons button.primary {
+  background-color: var(--color-success);
+  color: var(--text-primary);
+  border: none;
+}
+
+.modalButtons button.primary:hover {
+  background-color: var(--color-success-hover);
+}
+
+.noCover {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #2a2a2a;
+  color: var(--text-muted);
+  font-size: var(--text-base);
+}
+
+.workCount {
+  margin: 0;
+  font-size: var(--text-xs);
+  color: var(--text-tertiary);
+  text-align: center;
+}
+
+.backButton {
+  background-color: var(--btn-glass);
+  color: var(--text-primary);
+  border: none;
+  padding: 10px 20px;
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+  font-size: var(--text-base);
+  font-weight: 500;
+  transition: background-color var(--transition-default);
+}
+
+.backButton:hover {
+  background-color: var(--btn-glass-hover);
+}
+
+.loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  color: var(--text-tertiary);
+  font-size: var(--text-xl);
+}
+
+.dateGroup {
+  margin-bottom: 10px;
+  background-color: var(--bg-root);
+  width: 100%;
+}
+
+.dateHeader {
+  margin-bottom: 10px;
+  padding: 8px 16px;
+  background-color: var(--bg-hover);
+  border-radius: var(--radius-lg);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  transition: background-color var(--transition-default);
+}
+
+.dateHeader:hover {
+  background-color: rgba(255, 255, 255, 0.08);
+}
+
+.dateText {
+  font-size: var(--text-lg);
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.groupCheckbox {
+  width: 20px;
+  height: 20px;
+  border: 2px solid var(--text-muted);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--transition-default);
+  background-color: var(--bg-surface);
+  flex-shrink: 0;
+}
+
+.groupCheckbox:hover {
+  border-color: #999;
+}
+
+.groupCheckbox.checked {
+  background-color: var(--color-success);
+  border-color: var(--color-success);
+}
+
+.groupCheckbox .checkmark {
+  color: var(--text-primary);
+  font-size: var(--text-base);
+  font-weight: bold;
+}
+
+.dateGroupContent {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  background-color: var(--bg-root);
+  width: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+.dateGroupContent .workCard {
+  position: static !important;
+  left: auto !important;
+  top: auto !important;
+  width: calc((100% - 5 * 28px) / 6) !important;
+  margin-right: 28px !important;
+  margin-bottom: 10px !important;
+}
+
+.dateGroupContent .workCard:nth-child(6n) {
+  margin-right: 0 !important;
+}
+
+@media (max-width: 1400px) {
+  .dateGroupContent .workCard {
+    width: calc((100% - 4 * 28px) / 5) !important;
+  }
+  .dateGroupContent .workCard:nth-child(5n) {
+    margin-right: 0 !important;
+  }
+  .dateGroupContent .workCard:nth-child(6n) {
+    margin-right: 28px !important;
+  }
+}
+
+@media (max-width: 1200px) {
+  .dateGroupContent .workCard {
+    width: calc((100% - 3 * 28px) / 4) !important;
+  }
+  .dateGroupContent .workCard:nth-child(4n) {
+    margin-right: 0 !important;
+  }
+  .dateGroupContent .workCard:nth-child(5n) {
+    margin-right: 28px !important;
+  }
+}
+
+@media (max-width: 900px) {
+  .dateGroupContent .workCard {
+    width: calc((100% - 2 * 28px) / 3) !important;
+  }
+  .dateGroupContent .workCard:nth-child(3n) {
+    margin-right: 0 !important;
+  }
+  .dateGroupContent .workCard:nth-child(4n) {
+    margin-right: 28px !important;
+  }
+}
+
+@media (max-width: 600px) {
+  .dateGroupContent .workCard {
+    width: calc((100% - 1 * 28px) / 2) !important;
+  }
+  .dateGroupContent .workCard:nth-child(2n) {
+    margin-right: 0 !important;
+  }
+  .dateGroupContent .workCard:nth-child(3n) {
+    margin-right: 28px !important;
+  }
+}
+
+@media (max-width: 400px) {
+  .dateGroupContent .workCard {
+    width: 100% !important;
+    margin-right: 0 !important;
+  }
+}
+
+.batchDeleteBar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background-color: var(--bg-elevated);
+  border-top: 1px solid var(--border-default);
+  padding: 16px 24px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 16px;
+  z-index: 100;
+}
+
+.batchMoveBtn {
+  background-color: var(--color-warning);
+  color: var(--text-primary);
+  border: none;
+  padding: 12px 32px;
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+  font-size: var(--text-md);
+  font-weight: 500;
+  transition: background-color var(--transition-default);
+}
+
+.batchMoveBtn:hover:not(:disabled) {
+  background-color: var(--color-warning-hover);
+}
+
+.batchMoveBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.batchDownloadBtn {
+  background-color: var(--color-info);
+  color: var(--text-primary);
+  border: none;
+  padding: 12px 32px;
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+  font-size: var(--text-md);
+  font-weight: 500;
+  transition: background-color var(--transition-default);
+}
+
+.batchDownloadBtn:hover:not(:disabled) {
+  background-color: var(--color-info-hover);
+}
+
+.batchDownloadBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.batchSelectedCount {
+  color: var(--text-primary);
+  font-size: var(--text-md);
+}
+
+.batchDeleteBtn {
+  background-color: var(--color-danger);
+  color: var(--text-primary);
+  border: none;
+  padding: 12px 32px;
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+  font-size: var(--text-md);
+  font-weight: 500;
+  transition: background-color var(--transition-default);
+}
+
+.batchDeleteBtn:hover:not(:disabled) {
+  background-color: var(--color-danger-hover);
+}
+
+.batchDeleteBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.contextMenuOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 999;
+}
+
+.contextMenu {
+  position: fixed;
+  background-color: #2a2a2a;
+  border-radius: var(--radius-lg);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+  min-width: 120px;
+  z-index: 1000;
+  overflow: hidden;
+}
+
+.contextMenuItem {
+  padding: 12px 20px;
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: background-color var(--transition-default);
+  font-size: var(--text-base);
+}
+
+.contextMenuItem:hover {
+  background-color: #3a3a3a;
+}
+
+.contextMenuItem:active {
+  background-color: #4a4a4a;
+}
+
+.contextMenuItem.delete {
+  color: #ff6b6b;
+}
+
+.contextMenuItem.delete:hover {
+  background-color: rgba(255, 107, 107, 0.2);
+}
+
+.contextMenuSubmenu {
+  position: relative;
+}
+
+.submenuArrow {
+  float: right;
+  font-size: var(--text-xs);
+  color: var(--text-tertiary);
+}
+
+.contextSubmenu {
+  position: absolute;
+  top: 0;
+  left: 100%;
+  margin-left: 4px;
+  background-color: #2a2a2a;
+  border-radius: var(--radius-lg);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+  min-width: 140px;
+  z-index: 1001;
+  overflow: hidden;
+  display: none;
+}
+
+.contextMenuSubmenu:hover .contextSubmenu {
+  display: block;
+}
+
+.contextSubmenuItem {
+  padding: 10px 20px;
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: background-color var(--transition-default);
+  font-size: var(--text-base);
+  white-space: nowrap;
+}
+
+.contextSubmenuItem:hover {
+  background-color: #3a3a3a;
+}
+
+.contextSubmenuItem.disabled {
+  color: var(--text-muted);
+  cursor: not-allowed;
+}
+
+.contextSubmenuItem.disabled:hover {
+  background-color: transparent;
+}
+
+@media (max-width: 600px) {
+  .navbarBrand {
+    font-size: var(--text-lg);
+  }
+
+  .navbarActions {
+    gap: 8px;
+  }
+
+  .navbarBatchBtn,
+  .navbarSelectAllBtn,
+  .navbarCancelBtn,
+  .navbarDeleteBtn,
+  .navbarAddBtn {
+    padding: 8px 12px;
+    font-size: var(--text-sm);
+  }
+
+  .selectedCount {
+    font-size: var(--text-xs);
+  }
+
+  .waterfallContainer {
+    margin-top: 58px;
+    padding: 12px;
+  }
+}

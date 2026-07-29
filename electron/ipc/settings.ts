@@ -69,6 +69,65 @@ export function registerSettingsHandlers(): void {
     }
   });
 
+  ipcMain.handle('export-data', async (_event, targetPath: string) => {
+    try {
+      const appRootPath = getAppRootPath();
+      const imageDir = path.join(appRootPath, 'image');
+      const dataDir = path.join(appRootPath, 'data');
+
+      const exportImageDir = path.join(targetPath, 'image');
+      const exportDataDir = path.join(targetPath, 'data');
+      ensureDir(exportImageDir);
+      ensureDir(exportDataDir);
+
+      // Copy image directory
+      if (fs.existsSync(imageDir)) {
+        fs.cpSync(imageDir, exportImageDir, { recursive: true });
+      }
+      // Copy collections.json
+      const collectionsFile = path.join(dataDir, 'collections.json');
+      if (fs.existsSync(collectionsFile)) {
+        fs.copyFileSync(collectionsFile, path.join(exportDataDir, 'collections.json'));
+      }
+
+      return { success: true };
+    } catch (error: any) {
+      console.error('export-data error:', error);
+      return { success: false, error: error.message };
+    }
+  });
+
+  ipcMain.handle('import-data', async (_event, sourcePath: string) => {
+    try {
+      const appRootPath = getAppRootPath();
+      const sourceImageDir = path.join(sourcePath, 'image');
+      const sourceCollectionsFile = path.join(sourcePath, 'data', 'collections.json');
+
+      if (!fs.existsSync(sourceImageDir) || !fs.existsSync(sourceCollectionsFile)) {
+        return { success: false, error: '所选文件夹不包含有效的导出数据（需要 image 目录和 data/collections.json）' };
+      }
+
+      const targetImageDir = path.join(appRootPath, 'image');
+      const targetDataDir = path.join(appRootPath, 'data');
+      ensureDir(targetImageDir);
+      ensureDir(targetDataDir);
+
+      // Copy image directory (merges with existing)
+      if (fs.existsSync(sourceImageDir)) {
+        fs.cpSync(sourceImageDir, targetImageDir, { recursive: true });
+      }
+      // Copy collections.json
+      if (fs.existsSync(sourceCollectionsFile)) {
+        fs.copyFileSync(sourceCollectionsFile, path.join(targetDataDir, 'collections.json'));
+      }
+
+      return { success: true };
+    } catch (error: any) {
+      console.error('import-data error:', error);
+      return { success: false, error: error.message };
+    }
+  });
+
   ipcMain.handle('download-collection-images', async (_event, _collectionFolder: string, targetPath: string, imagePaths: string[]) => {
     try {
       const appRootPath = getAppRootPath();

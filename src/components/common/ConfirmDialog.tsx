@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import './common.css';
+import styles from './common.module.css';
 
 interface ConfirmDialogProps {
   title: string;
@@ -31,21 +31,21 @@ export default function ConfirmDialog({
   }, [onCancel]);
 
   return (
-    <div className="dialog-overlay" onClick={onCancel}>
-      <div className="dialog" onClick={e => e.stopPropagation()}>
-        <h3 className="dialog-title">{title}</h3>
-        <p className="dialog-message">{message}</p>
+    <div className={styles.dialogOverlay} onClick={onCancel}>
+      <div className={styles.dialog} onClick={e => e.stopPropagation()}>
+        <h3 className={styles.dialogTitle}>{title}</h3>
+        <p className={styles.dialogMessage}>{message}</p>
         {children}
-        <div className="dialog-buttons">
+        <div className={styles.dialogButtons}>
           <button
-            className="dialog-btn dialog-btn-cancel"
+            className={`${styles.dialogBtn} ${styles.dialogBtnCancel}`}
             onClick={onCancel}
             disabled={loading}
           >
             {cancelText}
           </button>
           <button
-            className="dialog-btn dialog-btn-confirm"
+            className={`${styles.dialogBtn} ${styles.dialogBtnConfirm}`}
             onClick={onConfirm}
             disabled={loading}
           >

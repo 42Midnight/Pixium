@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { getCoverBackgroundPosition, getCoverImageTransform } from '../../utils/format';
-import './common.css';
+import styles from './common.module.css';
 
 interface ImageDimensions {
   width: number;
@@ -86,35 +86,35 @@ export default function CoverAdjustModal({
   const imgTransform = getCoverImageTransform(position, dimensions);
 
   return (
-    <div className="dialog-overlay" onMouseDown={(e) => { if (e.target === e.currentTarget && !hasDraggedRef.current) onCancel(); }}>
-      <div className="cover-modal" onClick={e => e.stopPropagation()}>
-        <div className="cover-modal-header">
-          <span className="cover-modal-title">调整封面</span>
-          <button type="button" className="cover-modal-close" onClick={onCancel} />
+    <div className={styles.dialogOverlay} onMouseDown={(e) => { if (e.target === e.currentTarget && !hasDraggedRef.current) onCancel(); }}>
+      <div className={styles.coverModal} onClick={e => e.stopPropagation()}>
+        <div className={styles.coverModalHeader}>
+          <span className={styles.coverModalTitle}>调整封面</span>
+          <button type="button" className={styles.coverModalClose} onClick={onCancel} />
         </div>
-        <div className="cover-modal-content">
-          <div className="cover-crop-area" onMouseDown={handleDragStart}>
-            <div className="cover-crop-image-wrapper">
+        <div className={styles.coverModalContent}>
+          <div className={styles.coverCropArea} onMouseDown={handleDragStart}>
+            <div className={styles.coverCropImageWrapper}>
               <img
                 src={imageUrl}
                 alt="调整封面"
-                className="cover-crop-image"
+                className={styles.coverCropImage}
                 onLoad={handleImageLoad}
                 style={{ transform: imgTransform }}
                 draggable={false}
               />
             </div>
-            <div className="cover-crop-frame" />
+            <div className={styles.coverCropFrame} />
           </div>
         </div>
-        <div className="cover-modal-footer">
-          <button type="button" className="cover-modal-confirm" onClick={() => onConfirm(position, dimensions.height > dimensions.width)}>
+        <div className={styles.coverModalFooter}>
+          <button type="button" className={styles.coverModalConfirm} onClick={() => onConfirm(position, dimensions.height > dimensions.width)}>
             确定
           </button>
-          <button type="button" className="cover-modal-reset" onClick={() => { setPosition(50); setIsDragging(false); }}>
+          <button type="button" className={styles.coverModalReset} onClick={() => { setPosition(50); setIsDragging(false); }}>
             恢复默认
           </button>
-          <button type="button" className="cover-modal-cancel" onClick={onCancel}>
+          <button type="button" className={styles.coverModalCancel} onClick={onCancel}>
             取消
           </button>
         </div>

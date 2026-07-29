@@ -19,7 +19,7 @@ export function generateFileName(originalName: string): string {
 }
 
 export function sanitizeFolderName(name: string): string {
-  return name.replace(/[<>:"/\\|?*]/g, '_');
+  return name.replace(/[<>:"/\\|?* ]/g, '_');
 }
 
 const IMAGE_EXTENSIONS = ['.jpg', '.jpeg', '.png', '.gif', '.bmp', '.webp'];

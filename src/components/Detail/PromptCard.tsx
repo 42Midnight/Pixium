@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import styles from './Detail.module.css';
 
 interface PromptCardProps {
   fieldName: string;
@@ -16,25 +17,25 @@ export default function PromptCard({
 }: PromptCardProps) {
   return (
     <div
-      className={`prompt-card ${isSelected ? 'selected' : ''}`}
+      className={`${styles.promptCard} ${isSelected ? styles.selected : ''}`}
       onClick={() => isMultiSelectMode && onToggleSelect(fieldName)}
     >
-      <div className="prompt-card-header">
-        <div className="prompt-field-header" style={{ flex: 1, marginRight: '16px' }}>
+      <div className={styles.promptCardHeader}>
+        <div className={styles.promptFieldHeader} style={{ flex: 1, marginRight: '16px' }}>
           {isMultiSelectMode && (
-            <input type="checkbox" className="field-checkbox" checked={isSelected}
+            <input type="checkbox" className={styles.fieldCheckbox} checked={isSelected}
               onChange={e => { e.stopPropagation(); onToggleSelect(fieldName); }} />
           )}
-          <span className="prompt-field-name">{fieldName}</span>
+          <span className={styles.promptFieldName}>{fieldName}</span>
         </div>
         <div className="prompt-card-actions">
-          <button className={`copy-button ${copiedField === fieldName ? 'copied' : ''}`}
+          <button className={`${styles.copyButton} ${copiedField === fieldName ? styles.copied : ''}`}
             onClick={e => { e.stopPropagation(); onCopy(fieldName, fieldValue); }}>
             {copiedField === fieldName ? '已复制' : '复制'}
           </button>
         </div>
       </div>
-      <div className="prompt-card-content">{fieldValue}</div>
+      <div className={styles.promptCardContent}>{fieldValue}</div>
     </div>
   );
 }

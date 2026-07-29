@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react';
-import './common.css';
+import styles from './common.module.css';
 
 interface ContextMenuItem {
   label: string;
@@ -45,12 +45,12 @@ export default function ContextMenu({ x, y, items, onClose }: ContextMenuProps) 
 
   return (
     <>
-      <div className="context-menu-overlay" onClick={onClose} />
-      <div ref={menuRef} className="context-menu" style={{ left: x, top: y, position: 'fixed', zIndex: 1000 }}>
+      <div className={styles.contextMenuOverlay} onClick={onClose} />
+      <div ref={menuRef} className={styles.contextMenu} style={{ left: x, top: y, position: 'fixed', zIndex: 1000 }}>
         {items.map((item, index) => (
           <div
             key={index}
-            className={`context-menu-item${item.danger ? ' danger' : ''}`}
+            className={`${styles.contextMenuItem} ${item.danger ? styles.danger : ''}`}
             onClick={() => {
               item.onClick();
               onClose();

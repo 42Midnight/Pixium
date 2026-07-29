@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useTemplates } from '../../hooks/useTemplates';
 import type { TemplateField } from '../../types';
+import styles from './Upload.module.css';
 
 interface PromptEditorProps {
   fields: TemplateField[];
@@ -12,6 +13,12 @@ export default function PromptEditor({ fields, onChange }: PromptEditorProps) {
   const [showTemplateModal, setShowTemplateModal] = useState(false);
 
   const addField = () => onChange([...fields, { name: '', value: '' }]);
+
+  const clearAllText = () => onChange(
+    fields.map(f => ({ ...f, value: '' }))
+  );
+
+  const hasAnyText = fields.some(f => f.value.trim());
 
   const updateField = (index: number, key: 'name' | 'value', value: string) => {
     const updated = [...fields];
@@ -39,51 +46,59 @@ export default function PromptEditor({ fields, onChange }: PromptEditorProps) {
   };
 
   return (
-    <div className="prompt-section">
-      <div className="prompt-header">
-        <h3 className="section-title">文本内容</h3>
-        <button type="button" className="load-template-btn" onClick={() => { loadTemplates(); setShowTemplateModal(true); }}>
+    <div className={styles.promptSection}>
+      <div className={styles.promptHeader}>
+        <h3 className={styles.sectionTitle}>文本内容</h3>
+        <button type="button" className={styles.loadTemplateBtn} onClick={() => { loadTemplates(); setShowTemplateModal(true); }}>
           加载模板
         </button>
       </div>
 
-      <div className="prompt-fields">
+      <div className={styles.promptFields}>
         {fields.map((field, index) => (
-          <div key={index} className="prompt-field-item">
-            <div className="prompt-field-row">
+          <div key={index} className={styles.promptFieldItem}>
+            <div className={styles.promptFieldRow}>
               <input type="text" value={field.name} onChange={e => updateField(index, 'name', e.target.value)}
-                placeholder="小标题" className="prompt-field-name-input" spellCheck="false" />
+                placeholder="小标题" className={styles.promptFieldNameInput} spellCheck="false" />
               {fields.length > 1 && (
-                <button type="button" className="remove-field-btn" onClick={() => removeField(index)}>×</button>
+                <button type="button" className={styles.removeFieldBtn} onClick={() => removeField(index)}>×</button>
               )}
             </div>
             <textarea value={field.value} onChange={e => updateField(index, 'value', e.target.value)}
-              placeholder="内容" className="prompt-field-value-input" rows={3} spellCheck="false" />
+              placeholder="内容" className={styles.promptFieldValueInput} rows={3} spellCheck="false" />
           </div>
         ))}
       </div>
 
-      <div className="prompt-footer">
-        <button type="button" className="add-field-btn" onClick={addField}>+ 添加字段</button>
+      <div className={styles.promptFooter}>
+        <button
+          type="button"
+          className={styles.clearTextBtn}
+          onClick={clearAllText}
+          disabled={!hasAnyText}
+        >
+          清空文本
+        </button>
+        <button type="button" className={styles.addFieldBtn} onClick={addField}>添加字段</button>
       </div>
 
       {showTemplateModal && (
-        <div className="template-modal-overlay" onClick={() => setShowTemplateModal(false)}>
-          <div className="template-modal" onClick={e => e.stopPropagation()}>
-            <div className="modal-header">
+        <div className={styles.templateModalOverlay} onClick={() => setShowTemplateModal(false)}>
+          <div className={styles.templateModal} onClick={e => e.stopPropagation()}>
+            <div className={styles.modalHeader}>
               <h3>选择模板</h3>
-              <button className="close-modal-btn" onClick={() => setShowTemplateModal(false)}>×</button>
+              <button className={styles.closeModalBtn} onClick={() => setShowTemplateModal(false)}>×</button>
             </div>
-            <div className="template-list">
+            <div className={styles.templateList}>
               {templates.length === 0 ? (
-                <p className="no-templates">暂无模板</p>
+                <p className={styles.noTemplates}>暂无模板</p>
               ) : (
                 templates.map(t => (
-                  <div key={t.id} className="template-item" onClick={() => applyTemplate(t)}>
-                    <div className="template-name">{t.name}</div>
-                    <div className="template-preview">
+                  <div key={t.id} className={styles.templateItem} onClick={() => applyTemplate(t)}>
+                    <div className={styles.templateName}>{t.name}</div>
+                    <div className={styles.templatePreview}>
                       {t.fields?.slice(0, 3).map((f, i) => (
-                        <span key={i} className="template-tag">{f.name || '未命名字段'}</span>
+                        <span key={i} className={styles.templateTag}>{f.name || '未命名字段'}</span>
                       ))}
                     </div>
                   </div>

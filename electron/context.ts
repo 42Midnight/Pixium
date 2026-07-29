@@ -25,11 +25,13 @@ export function getAppRootPath(): string {
 
 export function getImageURL(relativePath: string): string {
   if (app.isPackaged || process.env.FORCE_PACKAGED_MODE === 'true') {
-    return `pixium:///${relativePath}`;
+    return `pixium:///${relativePath.replace(/\\/g, '/')}`;
   }
   const appRoot = getAppRootPath();
   const fullPath = path.join(appRoot, relativePath).replace(/\\/g, '/');
-  return `file:///${fullPath}`;
+  // Encode spaces and other URI-unsafe chars in the path
+  const encoded = fullPath.replace(/ /g, '%20').replace(/#/g, '%23');
+  return `file:///${encoded}`;
 }
 
 export function ensureDir(dirPath: string): void {

@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import ContextMenu from '../common/ContextMenu';
+import styles from './Detail.module.css';
 
 interface ImageViewerProps {
   images: string[];
@@ -112,21 +113,21 @@ export default function ImageViewer({ images, title, folder, coverUrl, downloadP
   ];
 
   const renderImage = (imagePath: string, index?: number) => (
-    <div key={index} className="detail-image-wrapper">
-      <div className="image-container"
+    <div key={index} className={styles.detailImageWrapper}>
+      <div className={styles.imageContainer}
         onClick={() => { const path = buildImagePath(typeof imagePath === 'string' && imagePath.includes('/') ? imagePath : imagePath); setZoomedPath(path); setZoomedRawPath(stripProtocol(path)); setIsZoomed(true); }}
         onContextMenu={e => handleContextMenu(e, imagePath)}>
-        <img src={imagePath} alt={title} className="detail-image"
+        <img src={imagePath} alt={title} className={styles.detailImage}
           onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />
       </div>
-      {showFilename && <p className="image-filename">{imagePath.split('/').pop()}</p>}
+      {showFilename && <p className={styles.imageFilename}>{imagePath.split('/').pop()}</p>}
     </div>
   );
 
   return (
     <>
       {images.length > 1 ? (
-        <div className="multiple-images-container">
+        <div className={styles.multipleImagesContainer}>
           {images.map((name, i) => renderImage(buildImagePath(name), i))}
         </div>
       ) : (
@@ -134,11 +135,11 @@ export default function ImageViewer({ images, title, folder, coverUrl, downloadP
       )}
 
       {isZoomed && (
-        <div className="image-zoom-overlay"
+        <div className={styles.imageZoomOverlay}
           onClick={() => { setIsZoomed(false); setContextMenu(null); }}
           onContextMenu={e => { e.preventDefault(); setContextMenu({ x: e.clientX, y: e.clientY, imagePath: zoomedPath, rawPath: decodeURIComponent(zoomedRawPath) }); }}>
-          <div className="image-zoom-container">
-            <img src={zoomedPath} alt={title} className="image-zoom-content" draggable={false} />
+          <div className={styles.imageZoomContainer}>
+            <img src={zoomedPath} alt={title} className={styles.imageZoomContent} draggable={false} />
           </div>
           {contextMenu && (
             <div onClick={e => e.stopPropagation()} onContextMenu={e => e.stopPropagation()}>

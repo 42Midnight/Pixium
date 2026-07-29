@@ -66,6 +66,12 @@ contextBridge.exposeInMainWorld('electronAPI', {
   downloadCollectionImages: (collectionFolder, targetPath, imagePaths) =>
     ipcRenderer.invoke('download-collection-images', collectionFolder, targetPath, imagePaths),
 
+  exportData: (targetPath) =>
+    ipcRenderer.invoke('export-data', targetPath),
+
+  importData: (sourcePath) =>
+    ipcRenderer.invoke('import-data', sourcePath),
+
   saveImageAs: (imagePath) =>
     ipcRenderer.invoke('save-image-as', imagePath),
 
