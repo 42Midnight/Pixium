@@ -286,6 +286,21 @@ All five commands should exit cleanly with no errors. If they pass, `npm start` 
 | Build fails with memory errors               | Set `NODE_OPTIONS=--max-old-space-size=4096` before building |
 | TypeScript errors about missing DOM types    | Make sure `"lib": ["ES2020", "DOM", "DOM.Iterable"]` is present in tsconfig.json |
 
+## Common Commands
+
+Quick reference for the npm scripts you'll use most often:
+
+| Command                    | Description                                              |
+| -------------------------- | -------------------------------------------------------- |
+| `npm install`              | Install all dependencies                                 |
+| `npm start`                | Full dev mode — Vite HMR + Electron                      |
+| `npm run start:packaged`   | Dev mode simulating packaged app (reads from `%APPDATA%`) |
+| `npm run dev`              | Browser-only UI dev (no Electron APIs)                   |
+| `npm run build:electron`   | Compile `electron/*.ts` → `electron-dist/`               |
+| `npm run build`            | Bundle `src/` → `dist/` (Vite)                           |
+| `npm run lint`             | Run ESLint across the project                            |
+| `npm run dist:win`         | Build Windows NSIS installer → `release/`                |
+
 ## Settings
 
 | Setting                 | Description                                 |

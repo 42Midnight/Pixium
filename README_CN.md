@@ -174,32 +174,134 @@ pixium/
 
 ## 快速开始
 
+本章节指导你从克隆仓库到搭建完整开发环境的全过程。
+
 ### 环境要求
 
-- Node.js 18+
-- npm
+| 工具           | 所需版本                  | 备注                                          |
+| -------------- | ----------------------- | ---------------------------------------------- |
+| Node.js        | ≥ 18（推荐 LTS 22）      | 从 [nodejs.org](https://nodejs.org) 下载安装    |
+| npm            | 随 Node.js 附带          | 也可使用 pnpm / yarn                            |
+| Git            | 任意较新版本              | 用于克隆仓库                                    |
 
-### 安装与运行
+> **仅限 Windows。** 应用目前只发布 Windows x64 的 NSIS 安装包。在 macOS / Linux 上进行开发未经测试 — Electron 壳能启动，但平台相关的路径可能无法正确解析。
+
+### 1. 克隆仓库
 
 ```bash
-# 安装依赖
-npm install
-
-# 启动应用（调试模式）
-npm run start:packaged
-
-# 代码检查
-npm run lint
+git clone https://github.com/42Midnight/Pixium.git
+cd Pixium
 ```
 
-### 构建
+### 2. 安装依赖
 
 ```bash
-# 构建 Windows 安装包（NSIS）
+npm install
+```
+
+该命令会安装全部所需内容：
+- **运行时** — React 19、React Router v7
+- **开发工具** — Vite 8、TypeScript 6、ESLint、Electron 41
+- **打包工具** — electron-builder
+
+### 3. 开发流程
+
+项目在开发过程中同时编译两个目标：
+
+| 目标             | 源码目录              | 输出目录             | 构建工具     |
+| ---------------- | --------------------- | -------------------- | ------------ |
+| 渲染进程（UI）    | `src/`                | `dist/`              | Vite         |
+| 主进程（Node）    | `electron/`           | `electron-dist/`     | `tsc`        |
+
+三个常用脚本覆盖典型开发流程：
+
+```bash
+# --- 方式 A：完整开发模式（热更新）---
+# 同时启动 Vite dev server 和 Electron。Vite HMR 保证渲染进程
+# 实时更新；按 Ctrl+R / F5 刷新 Electron 窗口。
+npm start
+
+# --- 方式 B：模拟打包模式 ---
+# 同上，但设置 FORCE_PACKAGED_MODE=true，应用数据从
+# %APPDATA%/Pixium/ 读取，而非仓库根目录。
+npm run start:packaged
+
+# --- 方式 C：纯浏览器 UI 开发 ---
+# 仅在浏览器中打开 Vite dev server，Electron API 不可用。
+# 适合快速迭代组件和样式。
+npm run dev
+```
+
+**典型工作流程：**
+
+1. 运行 `npm start` 启动完整 Electron 应用。
+2. 编辑 `src/` 下的文件 — 渲染进程自动热更新。
+3. 如修改 `electron/` 下的文件，终止进程后重新运行 `npm start`（或手动执行 `npm run build:electron && electron .`）。
+4. 提交前运行 `npm run lint` 检查类型和代码风格。
+
+### 4. 构建安装包
+
+```bash
+# 编译 TypeScript → Vite 打包 → electron-builder 封装
 npm run dist:win
 ```
 
-产物输出至 `release/` 目录。
+NSIS 安装包输出到 `release/` 目录，文件名为 `Pixium-<version>-x64-setup.exe`。
+
+**底层步骤** — `npm run dist:win` 按顺序执行：
+
+1. `npm run build:electron` — 编译 `electron/*.ts` → `electron-dist/`
+2. `vite build` — 打包 `src/` → `dist/`
+3. `electron-builder --win` — 将两者封装为 Windows 安装包
+
+### 5. 验证环境
+
+克隆并执行 `npm install` 后，通过以下命令确认工具链正常：
+
+```bash
+# 类型检查渲染进程（不输出文件）
+npx tsc --noEmit
+
+# 类型检查 Electron 主进程
+npx tsc -p tsconfig.electron.json --noEmit
+
+# 代码检查
+npm run lint
+
+# 构建渲染进程
+npm run build
+
+# 编译 Electron 主进程
+npm run build:electron
+```
+
+以上五条命令均应正常退出，无报错。全部通过后执行 `npm start` 即可启动应用。
+
+### 常见问题
+
+| 现象                                        | 可能原因与解决方法                                             |
+| ------------------------------------------- | ------------------------------------------------------------ |
+| `Cannot find module 'electron'`             | 执行 `npm install` — Electron 是 devDependency                |
+| `'electron' is not recognized`              | 将 `node_modules/.bin` 加入 PATH，或使用 `npx electron .`      |
+| 启动后白屏                                   | Vite dev server 尚未就绪 — 稍等几秒后按 Ctrl+R 刷新             |
+| Windows 上出现 `EPERM` 或权限错误             | 关闭项目文件夹内的所有文件资源管理器窗口                          |
+| 构建时内存溢出                                | 构建前设置 `NODE_OPTIONS=--max-old-space-size=4096`            |
+| TypeScript 报错缺少 DOM 类型                  | 确认 tsconfig.json 中包含 `"lib": ["ES2020", "DOM", "DOM.Iterable"]` |
+
+## 常用命令
+
+最常用的 npm 脚本速查：
+
+| 命令                       | 说明                                                      |
+| -------------------------- | -------------------------------------------------------- |
+| `npm install`              | 安装全部依赖                                                |
+| `npm start`                | 完整开发模式 — Vite 热更新 + Electron                        |
+| `npm run start:packaged`   | 模拟打包模式（数据从 `%APPDATA%` 读取）                       |
+| `npm run dev`              | 纯浏览器 UI 开发（Electron API 不可用）                       |
+| `npm run build:electron`   | 编译 `electron/*.ts` → `electron-dist/`                    |
+| `npm run build`            | 打包 `src/` → `dist/`（Vite）                               |
+| `npm run lint`             | 运行 ESLint 代码检查                                        |
+| `npm run dist:win`         | 构建 Windows NSIS 安装包 → `release/`                      |
 
 ## 设置项
 
