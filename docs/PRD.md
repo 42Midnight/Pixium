@@ -1,251 +1,254 @@
-# Pixium — Product Requirements Document
+# Pixium — 产品需求文档
 
-## 1. Product Identity
+## 1. 产品定位
 
-| Field | Value |
+| 项目 | 说明 |
 |---|---|
-| **Product Name** | Pixium |
-| **Tagline (EN)** | A local-first desktop application that stores images together with their supporting structured text information |
-| **Tagline (CN)** | 一款本地优先的桌面相册应用，支持将图片和文本信息一起存储 |
-| **Elevator Pitch** | Pixium is a Windows desktop app purpose-built for AI image creators (ComfyUI / Stable Diffusion users). It pairs generated images with their prompt metadata in structured text fields, organizes them into collections with a responsive masonry waterfall layout, and keeps all data on your local filesystem — no cloud, no account, no uploads. |
-| **Author** | 42Midnight |
-| **License** | MIT |
-| **Repository** | https://github.com/42Midnight/Pixium |
-| **Keywords** | comfyui, prompt, manager, stable-diffusion, electron |
+| **产品名称** | Pixium |
+| **产品口号** | 一款本地优先的桌面相册应用，支持将图片和文本信息一起存储 |
+| **一句话介绍** | Pixium 是一款面向 AI 图像创作者（ComfyUI / Stable Diffusion 用户）的 Windows 桌面应用。它能将生成的图片与 Prompt 等结构化文本信息配对存储，用响应式瀑布流布局浏览，按相册归类整理。所有数据存储在本地文件系统——无需云端、无需账号、无需上传。 |
+| **作者** | 42Midnight |
+| **许可证** | MIT |
+| **仓库地址** | https://github.com/42Midnight/Pixium |
+| **关键词** | comfyui, prompt, manager, stable-diffusion, electron |
 
 ---
 
-## 2. Product Positioning
+## 2. 目标用户
 
-### Target Audience
+### 主要用户：AI 图像创作者
 
-**Primary: AI Image Creators** — Users of ComfyUI, Stable Diffusion WebUI, and similar tools who:
+使用 ComfyUI、Stable Diffusion WebUI 等工具的用户，他们需要：
 
-- Generate dozens to hundreds of AI images per session
-- Need to preserve prompt metadata alongside each image
-- Want to organize outputs by project, theme, or generation session
-- Frequently copy and reuse prompts
-- Value local-first, private data storage — images never leave their machine
+- 每次生成几十到几百张图片，需要高效管理
+- 保留每张图片的 Prompt 等元数据
+- 按项目、主题或生成批次整理作品
+- 频繁复制和复用 Prompt
+- 注重数据隐私——图片不需要上传到任何云端服务
 
-**Secondary: Image Collectors** — Users who want a local album manager with waterfall browsing and tagging, without the AI-specific features.
+### 次要用户：普通图片收藏者
 
-### Core Value Proposition
-
-1. **Local-first** — All data lives on your filesystem as plain JSON and image files. No server, no account, no internet required.
-2. **Prompt-native** — Structured text fields are first-class citizens, not an afterthought. Copy individual fields, batch-select, or copy all with one click.
-3. **Auto-extract** — Drop a PNG from ComfyUI or SD WebUI and Pixium parses the embedded generation parameters automatically.
-4. **Waterfall browsing** — Responsive masonry layout adapts to window width, making large collections scannable at a glance.
-5. **Batch operations** — Move, copy, download, or delete dozens of works at once.
-
-### Non-Goals
-
-- Cloud sync / multi-device support
-- Image editing or generation
-- Collaborative features
-- macOS / Linux support (Windows-only for now)
+希望用瀑布流浏览和标签来整理本地图片的用户，不需要 AI 相关功能。
 
 ---
 
-## 3. User Personas
+## 3. 核心价值
 
-### Persona A: AI Generation Power User (ComfyUI)
+1. **本地优先** — 所有数据以纯 JSON 和图片文件形式存储在本地磁盘。不需要服务器、不需要账号、不需要网络。
+2. **Prompt 原生** — 结构化文本字段是头等公民。支持逐字段复制、多选批量复制、一键复制全部。
+3. **自动提取** — 拖入 ComfyUI 或 SD WebUI 生成的 PNG，Pixium 自动解析嵌入的生成参数。
+4. **瀑布流浏览** — 响应式瀑布流布局自适应窗口宽度，大量作品也能一目了然。
+5. **批量操作** — 一键批量移动、复制、下载或删除多个作品。
 
-- **Workflow**: Runs ComfyUI → generates batches of images → saves outputs to a folder → drags into Pixium
-- **Pain point**: ComfyUI outputs are scattered across folders; prompts get lost in filename hashes; finding "that one image with the good seed" takes forever
-- **Pixium solves**: Auto-extracts prompts from PNG metadata, organizes by collection, searchable by title/tag/date, one-click prompt copy
+### 非目标
 
-### Persona B: Casual Image Collector
-
-- **Workflow**: Browses the web, saves reference images, wants to keep them organized locally
-- **Pain point**: File Explorer is not a gallery; cloud services require uploads and accounts
-- **Pixium solves**: Drag-and-drop collection building, tag-based organization, local-only storage
-
----
-
-## 4. Feature Inventory
-
-### 4.1 Collection Management
-
-| # | Feature | Description |
-|---|---|---|
-| C1 | Create Collection | Name + optional custom cover image with drag-to-crop positioning |
-| C2 | Edit Collection | Rename (auto-renames disk folder + updates all references), change cover, adjust crop |
-| C3 | Delete Collection | Removes folder, cover, and updates collections.json with cascading cleanup |
-| C4 | Drag-to-reorder | Drag collection cards on home page to reorder |
-| C5 | Virtual "All Works" | Auto-generated collection showing every work across all collections |
-| C6 | Collection sorting | Configurable position for new collections: front or back |
-
-### 4.2 Work Management
-
-| # | Feature | Description |
-|---|---|---|
-| W1 | Add Work | Drag-and-drop or file picker; reorder images within preview; merge mode (all in one) or batch mode (one per image) |
-| W2 | Edit Work | Change images, update text fields, tags, cover, and collection assignment |
-| W3 | Delete Work | With confirmation dialog |
-| W4 | Title | Auto-derived from filename (spaces → underscores) or custom |
-| W5 | Tags | Type-to-add with Enter; Backspace removes last; paste comma-separated to bulk-add |
-| W6 | Cover Crop | Manual drag-to-crop modal with live preview |
-| W7 | Duplicate Detection | Checks for existing folder name before creating |
-
-### 4.3 Prompt / Text Fields
-
-| # | Feature | Description |
-|---|---|---|
-| P1 | Dynamic Fields | Add/remove key-value text field pairs per work |
-| P2 | Templates | Pre-defined field name sets; select from dropdown when creating a work |
-| P3 | PNG Auto-extract | Parses ComfyUI API format, ComfyUI workflow format, and SD WebUI parameters from PNG metadata |
-| P4 | Click-to-copy | Click any single field to copy its value |
-| P5 | Multi-select Copy | Check specific fields, copy selected joined by newlines |
-| P6 | Copy All | One-click copy all field values |
-
-### 4.4 Browsing & Search
-
-| # | Feature | Description |
-|---|---|---|
-| B1 | Waterfall Layout | Responsive masonry (1–6 columns) based on window width |
-| B2 | Search Bar | Real-time typeahead with trie-based autocomplete; supports `#tag`, `dateYYYY.M.D-YYYY.M.D`, and plain text |
-| B3 | Date Grouping | Toggle to group works by creation date with collapsible headers |
-| B4 | Scroll Restoration | Restores position when navigating back from detail/edit |
-
-### 4.5 Detail View
-
-| # | Feature | Description |
-|---|---|---|
-| D1 | Image Viewer | Full-size with scroll-wheel / pinch zoom and drag-to-pan |
-| D2 | Multi-image | Navigate between images within a single work |
-| D3 | Filename Overlay | Optional overlay (toggle in Settings) |
-| D4 | Right-click Context Menu | Copy image, Download, Save As |
-| D5 | Quick Actions | Favorite, Edit, Download, Save As, Delete |
-
-### 4.6 Batch Operations
-
-| # | Feature | Description |
-|---|---|---|
-| BO1 | Batch Select Mode | Toggle to multi-select works or collections |
-| BO2 | Select by Date Group | Click a date header to select all works in that group |
-| BO3 | Batch Move | Move selected works to another collection |
-| BO4 | Batch Copy | Copy selected works to another collection |
-| BO5 | Batch Download | Download selected to configured path or pick folder |
-| BO6 | Batch Delete | Delete multiple works or collections |
-
-### 4.7 Favorites
-
-| # | Feature | Description |
-|---|---|---|
-| F1 | Favorite Toggle | Heart icon on work cards and detail page |
-| F2 | Favorites Page | Grid of all favorited works |
-| F3 | Sort Order | Newest first or oldest first |
-| F4 | Context Menu | Edit, Download, Save As, Delete from favorites page |
-
-### 4.8 Templates
-
-| # | Feature | Description |
-|---|---|---|
-| T1 | Create Template | Named template with key-value field pairs |
-| T2 | Edit Template | Add/remove/reorder fields inline |
-| T3 | Rename Template | Inline rename |
-| T4 | Delete Template | With confirmation |
-
-### 4.9 Settings
-
-| # | Feature | Description |
-|---|---|---|
-| S1 | Collection Add Position | Front or back |
-| S2 | Work Sort Order | Ascending or descending by creation date |
-| S3 | Show Image Filename | Toggle overlay in image viewer |
-| S4 | Show Date Grouping | Enable/disable date groups in waterfall |
-| S5 | Favorites Sort Order | Newest first or oldest first |
-| S6 | Download Path | Browse dialog to set default directory |
-| S7 | Import Data | Merge image/ + collections.json from exported folder |
-| S8 | Export Data | Copy entire data to `Pixium_Export_{date}/` |
-
-### 4.10 Window & System
-
-| # | Feature | Description |
-|---|---|---|
-| WS1 | Custom Title Bar | Frameless window with drag region, min/max/close controls |
-| WS2 | Always-on-Top | Pin button in title bar |
-| WS3 | Custom Protocol | `pixium:///` for packaged-mode image serving |
-| WS4 | File Watching | `fs.watch` on image/ directory for real-time updates |
-| WS5 | Auto-sync | Collections reconciled against disk contents on read |
+- 云端同步 / 多设备支持
+- 图片编辑或生成功能
+- 协作功能
+- macOS / Linux 支持（目前仅限 Windows）
 
 ---
 
-## 5. Core Workflows
+## 4. 用户画像
 
-### Workflow A: Create and Organize AI Generations
+### 画像 A：AI 生图重度用户（ComfyUI）
 
-1. Launch Pixium → Create a Collection (name after the generation session)
-2. Click into collection → "+ Add Work"
-3. Drag PNG files from ComfyUI output folder
-4. App auto-extracts prompt from PNG metadata into text fields
-5. Optionally add tags, adjust cover crop
-6. Save — images copied to local storage, prompt saved to `info.json`
-7. Browse collection in waterfall view
-8. Click any work → view full images + copy prompts
+- **工作流**：跑 ComfyUI → 批量生成图片 → 保存到本地文件夹 → 拖入 Pixium
+- **痛点**：ComfyUI 输出散落在各文件夹里；Prompt 丢失在哈希文件名中；找到"那张种子很好的图"极其困难
+- **Pixium 的解法**：自动从 PNG 提取 Prompt，按相册整理，支持按标题/标签/日期搜索，一键复制 Prompt
 
-### Workflow B: Browse and Find
+### 画像 B：普通图片收藏者
 
-1. Home page → scroll through collections
-2. Use search bar: type title, `#tag`, or `date2024.1.1-2024.12.31`
-3. Enter collection → browse waterfall
-4. Enable date grouping to see works by creation day
-5. Click work → full images + multi-select prompt fields → copy
-
-### Workflow C: Batch Operations
-
-1. Enter collection → "Batch Select"
-2. Select works or click date header to select a group
-3. Move / copy / download / delete selected
-
-### Workflow D: Template-Driven Entry
-
-1. Settings → Upload Templates → create template (e.g. "Positive", "Negative", "Seed", "Steps")
-2. When uploading, select template from dropdown
-3. Field names pre-filled; enter values or let PNG extraction auto-fill
-
-### Workflow E: Export and Backup
-
-1. Settings → Import Export → Export Data → pick destination
-2. All images + collections.json copied to `Pixium_Export_{date}/`
-3. On another machine: install Pixium → Import Data → select exported folder
+- **工作流**：浏览网页，保存参考图，想本地整理
+- **痛点**：文件管理器不是画廊；云服务需要上传和账号
+- **Pixium 的解法**：拖拽式相册构建，标签归类，纯本地存储
 
 ---
 
-## 6. Data Models
+## 5. 功能清单
 
-### WorkData
+### 5.1 相册管理
+
+| # | 功能 | 说明 |
+|---|---|---|
+| C1 | 创建相册 | 名称 + 可选自定义封面，拖拽裁剪定位 |
+| C2 | 编辑相册 | 重命名（自动重命名磁盘文件夹并更新所有引用）、更换封面、调整裁剪 |
+| C3 | 删除相册 | 删除文件夹、封面，级联清理引用 |
+| C4 | 拖拽排序 | 在首页拖拽相册卡片调整顺序 |
+| C5 | 虚拟"全部作品" | 自动生成的跨相册总览视图 |
+| C6 | 排序设置 | 新相册添加到最前或最后 |
+
+### 5.2 作品管理
+
+| # | 功能 | 说明 |
+|---|---|---|
+| W1 | 添加作品 | 拖拽或文件选择器；预览区内可拖拽排序；合并模式（多图合一）或批量模式（一图一作品） |
+| W2 | 编辑作品 | 更换图片、修改文本字段、标签、封面和所属相册 |
+| W3 | 删除作品 | 确认后删除 |
+| W4 | 标题 | 自动取文件名（空格替换为下划线），也可自定义 |
+| W5 | 标签 | 输入回车添加；Backspace 删除最后一个；粘贴逗号分隔文本批量添加 |
+| W6 | 封面裁剪 | 手动拖拽裁剪，实时预览 |
+| W7 | 重复检测 | 创建前检查是否已有同名文件夹 |
+
+### 5.3 Prompt / 文本字段
+
+| # | 功能 | 说明 |
+|---|---|---|
+| P1 | 动态字段 | 每个作品可自由增删键值对文本字段 |
+| P2 | 模板 | 预定义字段名集合，创建作品时从下拉菜单选择 |
+| P3 | PNG 自动提取 | 解析 ComfyUI API 格式、ComfyUI Workflow 格式、SD WebUI 参数格式的 PNG 元数据 |
+| P4 | 单击复制 | 单击任意字段即复制其内容 |
+| P5 | 多选复制 | 勾选多个字段，一键复制（换行拼接） |
+| P6 | 全部复制 | 一键复制所有字段内容 |
+
+### 5.4 浏览与搜索
+
+| # | 功能 | 说明 |
+|---|---|---|
+| B1 | 瀑布流布局 | 响应式（1~6 列），根据窗口宽度自适应 |
+| B2 | 搜索栏 | 实时补全，基于 Trie 前缀树；支持 `#标签名`、`dateYYYY.M.D-YYYY.M.D` 日期范围、纯文本 |
+| B3 | 日期分组 | 按创建日期分组展示，可折叠 |
+| B4 | 滚动恢复 | 从详情/编辑页返回时恢复滚动位置 |
+
+### 5.5 详情页
+
+| # | 功能 | 说明 |
+|---|---|---|
+| D1 | 图片查看器 | 全尺寸浏览，支持滚轮/捏合缩放和拖拽平移 |
+| D2 | 多图切换 | 同一作品内浏览多张图片 |
+| D3 | 文件名叠加 | 可选的文件名叠加显示（在设置中开关） |
+| D4 | 右键菜单 | 复制图片、下载、另存为 |
+| D5 | 快捷操作 | 收藏、编辑、下载、另存为、删除 |
+
+### 5.6 批量操作
+
+| # | 功能 | 说明 |
+|---|---|---|
+| BO1 | 批量选择模式 | 切换进入多选模式 |
+| BO2 | 按日期选中 | 点击日期标题即可全选该组所有作品 |
+| BO3 | 批量移动 | 将选中作品移动到其他相册 |
+| BO4 | 批量复制 | 将选中作品复制到其他相册 |
+| BO5 | 批量下载 | 将选中内容下载到预设路径或自定义目录 |
+| BO6 | 批量删除 | 删除多个作品或相册 |
+
+### 5.7 收藏
+
+| # | 功能 | 说明 |
+|---|---|---|
+| F1 | 收藏切换 | 作品卡片和详情页的心形图标 |
+| F2 | 收藏页面 | 所有收藏作品的网格视图 |
+| F3 | 排序 | 最新在前或最早在前 |
+| F4 | 右键菜单 | 编辑、下载、另存为、删除 |
+
+### 5.8 模板管理
+
+| # | 功能 | 说明 |
+|---|---|---|
+| T1 | 创建模板 | 命名模板，包含多个键值对字段 |
+| T2 | 编辑模板 | 行内增删改字段 |
+| T3 | 重命名模板 | 行内重命名 |
+| T4 | 删除模板 | 确认后删除 |
+
+### 5.9 设置
+
+| # | 功能 | 说明 |
+|---|---|---|
+| S1 | 相册添加位置 | 最前或最后 |
+| S2 | 作品排序方式 | 按创建日期升序或降序 |
+| S3 | 显示图片文件名 | 在图片查看器中开关文件名叠加 |
+| S4 | 显示日期分组 | 在瀑布流中开关日期分组 |
+| S5 | 收藏排序 | 最新在前或最早在前 |
+| S6 | 下载路径 | 浏览选择默认下载目录 |
+| S7 | 导入数据 | 合并外部导出的 image/ + collections.json |
+| S8 | 导出数据 | 将全部数据复制到 `Pixium_Export_{日期}/` |
+
+### 5.10 窗口与系统
+
+| # | 功能 | 说明 |
+|---|---|---|
+| WS1 | 自定义标题栏 | 无边框窗口，React 实现拖拽区域和窗口控件 |
+| WS2 | 窗口置顶 | 标题栏图钉按钮 |
+| WS3 | 自定义协议 | `pixium:///` 打包模式图片加载 |
+| WS4 | 文件监听 | `fs.watch` 监听 image/ 目录实时更新 |
+| WS5 | 自动同步 | 读取时相册与磁盘内容自动比对修复 |
+
+---
+
+## 6. 核心工作流
+
+### 流程 A：创建和整理 AI 生成作品
+
+1. 启动 Pixium → 新建相册（按生图批次命名）
+2. 进入相册 → 点击"+ 添加作品"
+3. 从 ComfyUI 输出目录拖入 PNG 文件
+4. 应用自动从 PNG 中提取 Prompt 填充文本字段
+5. 补充标签，调整封面裁剪
+6. 保存 — 图片复制到本地存储，Prompt 存入 `info.json`
+7. 瀑布流浏览相册
+8. 点击作品 → 查看大图 + 复制 Prompt
+
+### 流程 B：浏览和查找
+
+1. 首页滚动浏览相册
+2. 搜索栏输入标题、`#标签` 或 `date2024.1.1-2024.12.31`
+3. 进入相册浏览瀑布流
+4. 开启日期分组按创建日期查看
+5. 点击作品 → 大图 + 多选 Prompt 字段 → 复制
+
+### 流程 C：批量操作
+
+1. 进入相册 → 点击"批量选择"
+2. 多选作品或点击日期标题全选该组
+3. 移动 / 复制 / 下载 / 删除
+
+### 流程 D：模板驱动的录入
+
+1. 设置 → 上传模板 → 创建模板（如"正向提示词""负向提示词""种子""步数"）
+2. 上传作品时从下拉菜单选择模板
+3. 字段名自动填充；手动输入或让 PNG 提取自动填充值
+
+### 流程 E：导出和备份
+
+1. 设置 → 导入导出 → 导出数据 → 选择目标目录
+2. 全部图片 + collections.json 复制到 `Pixium_Export_{日期}/`
+3. 在另一台电脑：安装 Pixium → 导入数据 → 选择导出文件夹
+
+---
+
+## 7. 数据模型
+
+### WorkData（作品）
 
 ```
-id: string              // "collection_folder/work_folder"
-title: string           // Display title, defaults to filename
-cover: string           // URL to cover image (pixium:// or file://)
-fileName: string        // Relative path to first image
-folder?: string         // Disk path
-prompt: Record<string, string> | null  // Structured text fields
-images: string[]        // All image filenames
+id: string              // "相册文件夹/作品文件夹"
+title: string           // 显示标题，默认取文件名
+cover: string           // 封面图片 URL（pixium:// 或 file://）
+fileName: string        // 第一张图片的相对路径
+folder?: string         // 磁盘路径
+prompt: Record<string, string> | null  // 结构化文本字段
+images: string[]        // 所有图片文件名
 createdAt?: { year, month, day, hour, minute, second, timestamp }
 timestamp?: number
-coverPosition?: number  // 0–100 crop position
+coverPosition?: number  // 0~100 裁剪位置
 coverPositionVertical?: boolean
 collectionId?: string
 tags?: string[]
 ```
 
-### Collection
+### Collection（相册）
 
 ```
-id: string              // "collection_{timestamp}"
-name: string            // Display name
-folder: string          // Sanitized folder name on disk
-cover: string | null    // Custom cover URL or null (auto-derived)
+id: string              // "collection_{时间戳}"
+name: string            // 显示名称
+folder: string          // 磁盘上净化后的文件夹名
+cover: string | null    // 自定义封面 URL 或 null（自动派生）
 coverPosition?: number
 coverPositionVertical?: boolean
-images: string[]        // Work folder paths
+images: string[]        // 作品文件夹路径列表
 createdAt?: DateInfo
 ```
 
-### Template
+### Template（模板）
 
 ```
 id: number              // Date.now()
@@ -253,7 +256,7 @@ name: string
 fields: { id, name, value }[]
 ```
 
-### AppSettings
+### AppSettings（应用设置）
 
 ```
 collectionSortOrder: 'asc' | 'desc'
@@ -270,21 +273,21 @@ allWorksCoverPositionVertical?: boolean
 
 ---
 
-## 7. Data Storage
+## 8. 数据存储
 
-All data lives under `%APPDATA%/Pixium/` (production) or the project root (development):
+所有数据存放于 `%APPDATA%/Pixium/`（生产环境）或项目根目录（开发环境）：
 
 ```
-{data_root}/
+{数据根目录}/
 ├── image/
-│   ├── {collection_folder}/
-│   │   ├── {work_folder}/
-│   │   │   ├── image1.png
-│   │   │   ├── image2.png
+│   ├── {相册文件夹}/
+│   │   ├── {作品文件夹}/
+│   │   │   ├── 图片1.png
+│   │   │   ├── 图片2.png
 │   │   │   └── info.json
 │   │   └── ...
 │   └── collection_covers/
-│       └── {collection_folder}/
+│       └── {相册文件夹}/
 │           └── cover.jpg
 └── data/
     ├── collections.json
@@ -295,12 +298,12 @@ All data lives under `%APPDATA%/Pixium/` (production) or the project root (devel
 
 ---
 
-## 8. Platform & Distribution
+## 9. 平台与分发
 
-| Attribute | Value |
+| 属性 | 说明 |
 |---|---|
-| Target OS | Windows x64 |
-| Installer | NSIS (oneClick: false, perMachine: true) |
-| Output | `Pixium-{version}-x64-setup.exe` |
-| App ID | `io.github.42Midnight.Pixium` |
-| Desktop Shell | Electron 41 (frameless custom title bar) |
+| 目标系统 | Windows x64 |
+| 安装包格式 | NSIS（oneClick: false, perMachine: true） |
+| 产物文件名 | `Pixium-{版本号}-x64-setup.exe` |
+| 应用 ID | `io.github.42Midnight.Pixium` |
+| 桌面框架 | Electron 41（无边框自定义标题栏） |

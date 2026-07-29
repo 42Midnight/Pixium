@@ -1,101 +1,101 @@
-# Pixium — UI Design Specification
+# Pixium — UI 设计规范
 
-## 1. Design Philosophy
+## 1. 设计理念
 
-Pixium follows a **dark-first, utilitarian aesthetic** inspired by developer tools (VS Code, terminal emulators). The interface prioritizes content density and scannability over decorative elements. Color is used sparingly and semantically — green for creation, blue for information actions, red for destruction, orange for categorization.
+Pixium 采用**纯暗色、工具化**的视觉风格，灵感来源于开发者工具（VS Code、终端模拟器）。界面优先保证内容密度和可浏览性，装饰元素尽量克制。色彩谨慎地按语义使用——绿色代表创建，蓝色代表信息操作，红色代表删除，橙色代表归类。
 
-- **Motto**: Let the images be the color. The chrome stays out of the way.
-- **Theme**: Dark-only. No light mode is implemented.
-- **Typography**: System font stack — no webfonts, no custom typefaces.
+- **核心原则**：让图片成为色彩的主角，界面退居幕后。
+- **主题**：仅暗色。未实现亮色模式。
+- **字体**：系统字体栈——不使用 Web 字体，不引入自定义字体。
 
 ---
 
-## 2. Color Palette
+## 2. 色彩体系
 
-All colors are defined as CSS custom properties in `src/styles/tokens.css`. The palette is built in semantic layers.
+所有颜色通过 CSS 自定义属性定义在 `src/styles/tokens.css` 中。调色板按语义分层，从最暗到最亮。
 
-### 2.1 Background Layers
+### 2.1 背景层级
 
-| Token | Hex | Role |
+| Token | 色值 | 用途 |
 |---|---|---|
-| `--bg-root` | `#121212` | Page-level background (deepest layer) |
-| `--bg-surface` | `#1a1a1a` | Card and component surfaces |
-| `--bg-elevated` | `#1e1e1e` | Dialogs, modals (elevated above surfaces) |
-| `--bg-sidebar` | `#252525` | Sidebar panels |
-| `--bg-hover` | `rgba(255,255,255,0.05)` | Subtle hover highlight |
-| `--bg-overlay` | `rgba(0,0,0,0.7)` | Modal backdrop |
+| `--bg-root` | `#121212` | 页面级背景（最深层） |
+| `--bg-surface` | `#1a1a1a` | 卡片、组件面板 |
+| `--bg-elevated` | `#1e1e1e` | 对话框、模态框（浮于表面之上） |
+| `--bg-sidebar` | `#252525` | 侧边栏面板 |
+| `--bg-hover` | `rgba(255,255,255,0.05)` | 微妙的悬停高亮 |
+| `--bg-overlay` | `rgba(0,0,0,0.7)` | 模态框背景遮罩 |
 
-### 2.2 Input Elements
+### 2.2 输入元素
 
-| Token | Hex | Role |
+| Token | 色值 | 用途 |
 |---|---|---|
-| `--bg-input` | `#222` | Text inputs, textareas, tag containers |
-| `--bg-input-alt` | `#333` | Inner input fields within prompt items |
+| `--bg-input` | `#222` | 文本输入框、文本域、标签容器 |
+| `--bg-input-alt` | `#333` | Prompt 字段组内嵌的输入框 |
 
-### 2.3 Borders
+### 2.3 边框
 
-| Token | Hex | Role |
+| Token | 色值 | 用途 |
 |---|---|---|
-| `--border-default` | `#333` | Cards, panels, sections |
-| `--border-input` | `#444` | Input element borders |
-| `--border-focus` | `#555` | Focus state |
+| `--border-default` | `#333` | 卡片、面板、分节 |
+| `--border-input` | `#444` | 输入元素边框 |
+| `--border-focus` | `#555` | 聚焦态边框 |
 
-### 2.4 Semantic / Brand Colors
+### 2.4 语义色 / 品牌色
 
-| Token | Hex | Role |
+| Token | 色值 | 用途 |
 |---|---|---|
-| `--color-success` | `#4caf50` | Primary actions: create, upload, submit, save |
-| `--color-success-hover` | `#43a047` | Success button hover |
-| `--color-success-dark` | `#388e3c` | Alternative success hover |
-| `--color-info` | `#2196f3` | Information: download, select-all, batch-download |
-| `--color-info-hover` | `#1976d2` | Info button hover |
-| `--color-accent` | `#4a9eff` | Brand accent, navbar brand, delete-confirm button |
-| `--color-accent-hover` | `#007acc` | Accent hover, settings radio selected, browse button |
-| `--color-danger` | `#f44336` | Destructive: delete, remove |
-| `--color-danger-hover` | `#d32f2f` | Danger button hover |
-| `--color-warning` | `#ff9800` | Categorization: batch-move button |
-| `--color-warning-hover` | `#f57c00` | Warning button hover |
+| `--color-success` | `#4caf50` | 主要操作：创建、上传、提交、保存 |
+| `--color-success-hover` | `#43a047` | 成功按钮悬停 |
+| `--color-success-dark` | `#388e3c` | 备选成功悬停态 |
+| `--color-info` | `#2196f3` | 信息操作：下载、全选、批量下载 |
+| `--color-info-hover` | `#1976d2` | 信息按钮悬停 |
+| `--color-accent` | `#4a9eff` | 品牌强调色，导航栏标题 |
+| `--color-accent-hover` | `#007acc` | 强调色悬停，设置选项选中态 |
+| `--color-danger` | `#f44336` | 危险操作：删除、移除 |
+| `--color-danger-hover` | `#d32f2f` | 危险按钮悬停 |
+| `--color-warning` | `#ff9800` | 归类操作：批量移动按钮 |
+| `--color-warning-hover` | `#f57c00` | 警告按钮悬停 |
 
-### 2.5 Text Colors
+### 2.5 文字色
 
-| Token | Hex | Role |
+| Token | 色值 | 用途 |
 |---|---|---|
-| `--text-primary` | `#fff` | Headings, body text on dark backgrounds |
-| `--text-secondary` | `#ccc` | Secondary descriptions |
-| `--text-tertiary` | `#888` | Muted labels, icons, empty states |
-| `--text-muted` | `#666` | Placeholders, hints, disabled text |
+| `--text-primary` | `#fff` | 标题、正文（暗色背景上） |
+| `--text-secondary` | `#ccc` | 次要说明文字 |
+| `--text-tertiary` | `#888` | 弱化标签、图标、空状态 |
+| `--text-muted` | `#666` | 占位符、提示、禁用文字 |
 
-### 2.6 Additional Hardcoded Colors
+### 2.6 其他硬编码色彩
 
-These appear inline in CSS modules and are used consistently:
+以下色值出现在各 CSS Module 中但未纳入 token，使用一致：
 
-| Usage | Value |
+| 用途 | 色值 |
 |---|---|
-| Title bar background | `#0d0d0d` / `rgba(51,51,51,1)` |
-| Navbar background | `rgb(31, 31, 31)` |
-| Context menu background | `#2a2a2a` |
-| Context menu hover | `#3a3a3a` |
-| Context menu active | `#4a4a4a` |
-| Context menu danger item | `#ff6b6b` |
-| Settings active tab | `#2d2d2d` |
-| Settings sidebar border | `#3d3d3d` |
-| Favorite heart filled | `#ff4081` |
-| Favorite heart hover bg | `rgba(255,64,129,0.2)` |
-| Remove image button | `#ff4444` (hover: `#cc0000`) |
-| Tag pill background | `#3a3a3a` |
-| Import button blue | `#4a90d9` (hover: `#5aa0e9`) |
-| Import button orange | `#d98a4a` (hover: `#e9a06a`) |
-| Success toast | bg `rgba(76,175,80,0.15)`, text `#69db7c` |
-| Error toast | bg `rgba(244,67,54,0.15)`, text `#ff6b6b` |
-| Window close hover | `#e81123` (Windows red) |
+| 标题栏背景 | `#0d0d0d` / `rgba(51,51,51,1)` |
+| 导航栏背景 | `rgb(31, 31, 31)` |
+| 右键菜单背景 | `#2a2a2a` |
+| 右键菜单悬停 | `#3a3a3a` |
+| 右键菜单按下 | `#4a4a4a` |
+| 右键菜单危险项 | `#ff6b6b` |
+| 设置激活标签背景 | `#2d2d2d` |
+| 设置侧栏边框 | `#3d3d3d` |
+| 收藏心形填充 | `#ff4081` |
+| 收藏悬停背景 | `rgba(255,64,129,0.2)` |
+| 移除图片按钮 | `#ff4444`（悬停 `#cc0000`） |
+| 标签 pills 背景 | `#3a3a3a` |
+| 导入按钮蓝 | `#4a90d9`（悬停 `#5aa0e9`） |
+| 导入按钮橙 | `#d98a4a`（悬停 `#e9a06a`） |
+| 成功 Toast | bg `rgba(76,175,80,0.15)`，文字 `#69db7c` |
+| 错误 Toast | bg `rgba(244,67,54,0.15)`，文字 `#ff6b6b` |
+| 关闭按钮悬停 | `#e81123`（Windows 红） |
 
 ---
 
-## 3. Typography
+## 3. 字体排印
 
-### 3.1 Font Family
+### 3.1 字体族
 
-The app uses the **system font stack** only:
+应用仅使用**系统字体栈**：
 
 ```css
 body {
@@ -103,36 +103,36 @@ body {
 }
 ```
 
-Exception: `settingsPage` uses `Arial, sans-serif` (an inconsistency to be resolved).
+例外：`settingsPage` 使用了 `Arial, sans-serif`（待统一）。
 
-### 3.2 Font Size Scale
+### 3.2 字号层级
 
-| Token | Value | Typical Use |
+| Token | 值 | 典型用途 |
 |---|---|---|
-| `--text-xs` | `11px` | Image count badges, filter labels, hints |
-| `--text-sm` | `13px` | Tag pills, descriptions, batch-mode mobile |
-| `--text-base` | `14px` | Body text, buttons, context menu items, inputs |
-| `--text-md` | `15px` | Dialog messages, collection items |
-| `--text-lg` | `16px` | Section titles, prompt field names |
-| `--text-xl` | `18px` | Section headings, modal titles, empty states |
-| `--text-2xl` | `22px` | Dialog titles |
+| `--text-xs` | `11px` | 图片数量角标、筛选标签、提示文字 |
+| `--text-sm` | `13px` | 标签 pills、描述文字、批量模式小屏 |
+| `--text-base` | `14px` | 正文、按钮、右键菜单项、输入框 |
+| `--text-md` | `15px` | 对话框消息、相册列表项 |
+| `--text-lg` | `16px` | 分节标题、Prompt 字段名 |
+| `--text-xl` | `18px` | 段落标题、模态框标题、空状态 |
+| `--text-2xl` | `22px` | 对话框标题 |
 
-Additional hardcoded sizes: `20px` (navbar brand), `24px` (cover modal icon).
+其他硬编码字号：`20px`（导航栏品牌名）、`24px`（封面裁剪弹窗大图标）。
 
-### 3.3 Font Weights
+### 3.3 字重
 
-| Weight | Usage |
+| 字重 | 用途 |
 |---|---|
-| `400` | Body text, labels, descriptions |
-| `500` | Buttons, tag pills, modal buttons, settings tabs |
-| `600` | Dialog titles, section titles, navbar title, prompt field names |
-| `700` | Navbar brand, work titles, title bar title |
+| `400` | 正文、标签、说明 |
+| `500` | 按钮、标签 pills、模态框按钮、设置标签页 |
+| `600` | 对话框标题、分节标题、导航栏标题、Prompt 字段名 |
+| `700` | 导航栏品牌名、作品标题、标题栏标题 |
 
 ---
 
-## 4. Spacing System
+## 4. 间距系统
 
-| Token | Value |
+| Token | 值 |
 |---|---|
 | `--space-1` | `4px` |
 | `--space-2` | `8px` |
@@ -142,127 +142,127 @@ Additional hardcoded sizes: `20px` (navbar brand), `24px` (cover modal icon).
 | `--space-6` | `24px` |
 | `--space-8` | `32px` |
 
-### Common Spacing Patterns
+### 常用间距模式
 
-| Context | Spacing |
+| 场景 | 间距 |
 |---|---|
-| Dialog/modal padding | `32px` |
-| Card/section padding | `24px` |
-| Navbar padding | `0 24px` |
-| Waterfall container padding | `20px` |
-| Waterfall card margins | `28px` |
-| Detail content gap | `30px` |
-| Context menu item padding | `12px 20px` |
-| Standard button padding | `10px 28px` |
-| Compact button padding | `6px 16px` |
-| Button row gap | `12px` |
-| Tag pill padding | `2px 10px` (TagInput), `4px 12px` (display) |
+| 对话框 / 模态框内边距 | `32px` |
+| 卡片 / 分节内边距 | `24px` |
+| 导航栏内边距 | `0 24px` |
+| 瀑布流容器内边距 | `20px` |
+| 瀑布流卡片间距 | `28px` |
+| 详情页内容间距 | `30px` |
+| 右键菜单项内边距 | `12px 20px` |
+| 标准按钮内边距 | `10px 28px` |
+| 紧凑按钮内边距 | `6px 16px` |
+| 按钮行间距 | `12px` |
+| 标签 pill 内边距 | `2px 10px`（TagInput）、`4px 12px`（展示态） |
 
 ---
 
-## 5. Border Radius
+## 5. 圆角
 
-| Token | Value | Typical Use |
+| Token | 值 | 典型用途 |
 |---|---|---|
-| `--radius-sm` | `4px` | Checkboxes, tag pills, image index badges |
-| `--radius-md` | `6px` | Compact buttons, prompt input fields, settings options |
-| `--radius-lg` | `8px` | Standard buttons, modals, context menus, search input |
-| `--radius-xl` | `12px` | Dialogs, cards, cover modal, sections, import/export cards |
+| `--radius-sm` | `4px` | 复选框、标签 pills、图片序号角标 |
+| `--radius-md` | `6px` | 紧凑按钮、Prompt 输入字段、设置选项 |
+| `--radius-lg` | `8px` | 标准按钮、模态框、右键菜单、搜索输入框 |
+| `--radius-xl` | `12px` | 对话框、卡片、封面裁剪区、分节、导入导出卡片 |
 
 ---
 
-## 6. Transitions
+## 6. 过渡动画
 
-| Token | Value | Usage |
+| Token | 值 | 用途 |
 |---|---|---|
-| `--transition-fast` | `0.15s ease` | Window control hover, favorite heart scaling, search clear |
-| `--transition-default` | `0.2s ease` | Button backgrounds, border colors, card hover transform |
+| `--transition-fast` | `0.15s ease` | 窗口控件悬停、收藏心形缩放、搜索清除 |
+| `--transition-default` | `0.2s ease` | 按钮背景、边框色、卡片悬停位移 |
 
 ---
 
-## 7. Component Patterns
+## 7. 组件规范
 
-### 7.1 Buttons
+### 7.1 按钮
 
-Four semantic categories, all sharing `--transition-default` for hover/active state changes:
+四种语义类别，统一使用 `--transition-default` 过渡：
 
-| Category | Background | Hover | Typical Padding | Usage |
+| 类别 | 背景 | 悬停 | 典型内边距 | 用途 |
 |---|---|---|---|---|
-| **Glass/Ghost** | `rgba(255,255,255,0.1)` | `rgba(255,255,255,0.2)` | `10px 20px` | Cancel, Back, Copy, Clear All |
-| **Success** | `#4caf50` | `#43a047` | `12px 32px` | Submit, Create, Upload, Save |
-| **Info** | `#2196f3` | `#1976d2` | `8px 16px` | Download, Select-All, Cover Adjust |
-| **Danger** | `#f44336` | `#d32f2f` | `10px 24px` | Delete, Remove, Confirm Delete |
+| **毛玻璃 / 默认** | `rgba(255,255,255,0.1)` | `rgba(255,255,255,0.2)` | `10px 20px` | 取消、返回、复制、清除全部 |
+| **成功（绿）** | `#4caf50` | `#43a047` | `12px 32px` | 提交、创建、上传、保存 |
+| **信息（蓝）** | `#2196f3` | `#1976d2` | `8px 16px` | 下载、全选、封面调整 |
+| **危险（红）** | `#f44336` | `#d32f2f` | `10px 24px` | 删除、移除、确认删除 |
 
-Disabled state: `opacity: 0.5–0.6`, `cursor: not-allowed`.
+禁用态：`opacity: 0.5~0.6`，`cursor: not-allowed`。
 
-### 7.2 Cards (WorkCard / CollectionCard)
+### 7.2 卡片（WorkCard / CollectionCard）
 
-- **Layout**: Absolute positioning for masonry waterfall (computed in JS)
-- **Border radius**: `12px`
-- **Cover**: Square aspect ratio (`1/1`), `object-fit: cover`
-- **Hover**: `translateY(-4px)` lift (disabled in batch mode)
-- **Drag**: `opacity: 0.5` while dragging start; `cursor: grab` normal, `grabbing` active
-- **Selection**: `outline: 5px solid #4caf50`, `outline-offset: -5px`
-- **Image count badge**: Top-right, `rgba(0,0,0,0.4)` bg
-- **Favorite heart**: Bottom-right, `22px` SVG, scales `1.2x` hover, `0.95x` active
-- **Selection checkbox**: Top-left, `24×24px`, `4px` radius, green when checked
-- **Performance**: `content-visibility: auto` with `contain-intrinsic-size: 300px 250px`
+- **布局**：绝对定位实现瀑布流（JS 计算位置）
+- **圆角**：`12px`
+- **封面**：正方形宽高比（`1/1`），`object-fit: cover`
+- **悬停**：`translateY(-4px)` 上浮动效（批量模式下禁用）
+- **拖拽**：拖拽中 `opacity: 0.5`；正常 `cursor: grab`，拖拽中 `grabbing`
+- **选中**：`outline: 5px solid #4caf50`，`outline-offset: -5px`
+- **图片数量角标**：右上角，`rgba(0,0,0,0.4)` 背景
+- **收藏心形**：右下角，`22px` SVG，悬停缩放 `1.2x`，点击 `0.95x`
+- **选择复选框**：左上角，`24×24px`，`4px` 圆角，选中时绿色
+- **性能优化**：`content-visibility: auto` + `contain-intrinsic-size: 300px 250px`
 
-### 7.3 Dialogs
+### 7.3 对话框
 
-- **Overlay**: Fixed full-viewport, `rgba(0,0,0,0.7)`, z-index 1000
-- **Dialog box**: `#1e1e1e` bg, `12px` radius, `32px` padding, `max-width: 400px`, `width: 90%`
-- **Title**: `22px`, weight 600, `margin-bottom: 16px`
-- **Message**: `15px`, `#ccc`, `line-height: 1.6`, `margin-bottom: 28px`
-- **Buttons**: Center-aligned row, `gap: 12px`
-- **Dismissal**: Escape key, overlay click, or button action
+- **遮罩**：固定全屏，`rgba(0,0,0,0.7)`，z-index 1000
+- **对话框**：`#1e1e1e` 背景，`12px` 圆角，`32px` 内边距，`max-width: 400px`，`width: 90%`
+- **标题**：`22px`，字重 600，`margin-bottom: 16px`
+- **内容**：`15px`，`#ccc`，`line-height: 1.6`，`margin-bottom: 28px`
+- **按钮**：居中排列，`gap: 12px`
+- **关闭方式**：Esc 键、点击遮罩、或点击按钮
 
-### 7.4 Modals
+### 7.4 模态框
 
-**CoverAdjustModal:**
-- Same overlay as dialogs
-- Modal box: `#1e1e1e`, `12px` radius
-- Header: title + close, `padding: 16px 20px`, bottom border
-- Crop area: `300×300px`, `cursor: grab` (active: `grabbing`)
-- Footer: confirm (success) + reset (glass) + cancel (glass)
+**封面裁剪模态框（CoverAdjustModal）：**
+- 同对话框遮罩
+- 模态框体：`#1e1e1e`，`12px` 圆角
+- 头部：标题 + 关闭按钮，`padding: 16px 20px`，底部分割线
+- 裁剪区：`300×300px`，`cursor: grab`（拖拽中 `grabbing`）
+- 底部：确认（绿色）+ 重置（毛玻璃）+ 取消（毛玻璃）
 
-**Template Modal:**
-- `500px` wide, `max-width: 90%`, `max-height: 80vh`
-- Header with title + close
-- Scrollable template list with hover-highlighted items
+**模板选择模态框：**
+- `500px` 宽，`max-width: 90%`，`max-height: 80vh`
+- 头部含标题和关闭按钮
+- 可滚动模板列表，每项悬停时高亮
 
-### 7.5 Context Menu
+### 7.5 右键菜单
 
-- **Overlay**: Full-viewport transparent layer (click to dismiss), z-index 10000
-- **Menu**: `#2a2a2a` bg, `8px` radius, `box-shadow: 0 4px 12px rgba(0,0,0,0.5)`, `min-width: 120px`
-- **Items**: `padding: 12px 20px`, `14px`, hover: `#3a3a3a`, active: `#4a4a4a`
-- **Danger items**: `#ff6b6b`, hover bg `rgba(255,107,107,0.2)`
-- **Submenus**: Positioned `left: 100%`, shown on parent hover
-- **Dismissal**: Click outside, Escape, or after item click
+- **遮罩**：全屏透明层（点击即关闭），z-index 10000
+- **菜单**：`#2a2a2a` 背景，`8px` 圆角，`box-shadow: 0 4px 12px rgba(0,0,0,0.5)`，`min-width: 120px`
+- **菜单项**：`padding: 12px 20px`，`14px`，悬停 `#3a3a3a`，按下 `#4a4a4a`
+- **危险项**：`#ff6b6b`，悬停背景 `rgba(255,107,107,0.2)`
+- **子菜单**：定位在 `left: 100%`，父项悬停时显示
+- **关闭方式**：点击外部、Esc 键、或点击菜单项后
 
-### 7.6 Tag Input
+### 7.6 标签输入
 
-- **Container**: Flex wrap, `gap: 6px`, `padding: 6px 10px`, `#222` bg, `min-height: 38px`, `cursor: text`
-- **Pills**: `inline-flex`, `padding: 2px 10px`, `4px` radius, `13px`, `#3a3a3a` bg, `#ccc` text
-- **Remove**: `rgba(255,255,255,0.35)`, hover to `0.7`, `16×16px`
-- **Input**: Transparent bg, no border, `14px`, inherits font
+- **容器**：flex wrap，`gap: 6px`，`padding: 6px 10px`，`#222` 背景，`min-height: 38px`，`cursor: text`
+- **Pills**：`inline-flex`，`padding: 2px 10px`，`4px` 圆角，`13px`，`#3a3a3a` 背景，`#ccc` 文字
+- **移除按钮**：`rgba(255,255,255,0.35)`，悬停至 `0.7`，`16×16px`
+- **输入框**：透明背景，无边框，`14px`，继承字体
 
 ---
 
-## 8. Layout System
+## 8. 布局系统
 
-### 8.1 Waterfall / Masonry
+### 8.1 瀑布流 / 砖石布局
 
-- **Container**: `max-width: 1600px`, centered, `padding: 20px`
-- **Cards**: Absolute positioned with JS-computed `left`, `top`, `width`
-- **Responsive columns**: 1–6 based on window width
-- **Lazy rendering**: `content-visibility: auto` + `IntersectionObserver` (300px rootMargin) for background-image loading
+- **容器**：`max-width: 1600px`，居中，`padding: 20px`
+- **卡片**：绝对定位，JS 计算 `left`、`top`、`width`
+- **响应式列数**：1~6 列，根据窗口宽度自适应
+- **懒渲染**：`content-visibility: auto` + `IntersectionObserver`（300px rootMargin）
 
-### 8.2 Responsive Breakpoints
+### 8.2 响应式断点
 
-Used for grid-based layouts (Favorites, date groups):
+用于网格布局（收藏页、日期分组）：
 
-| Viewport | Columns |
+| 视口宽度 | 列数 |
 |---|---|
 | > 1400px | 6 |
 | ≤ 1400px | 5 |
@@ -271,68 +271,68 @@ Used for grid-based layouts (Favorites, date groups):
 | ≤ 600px | 2 |
 | ≤ 400px | 1 |
 
-### 8.3 Detail Layout
+### 8.3 详情页布局
 
-- **Default**: Side-by-side (`display: flex`, `gap: 30px`), left: image viewer (`flex: 1`), right: prompts (`flex: 1`, `max-width: 600px`)
-- **≤ 1024px**: Stacked (`flex-direction: column`)
+- **默认**：左右并排（`display: flex`，`gap: 30px`），左：图片查看器（`flex: 1`），右：Prompt 面板（`flex: 1`，`max-width: 600px`）
+- **≤ 1024px**：上下堆叠（`flex-direction: column`）
 
-### 8.4 Settings Layout
+### 8.4 设置页布局
 
-- **Default**: Sidebar (`240px`, fixed, `#252525` bg) + Main (`flex: 1`, `margin-left: 240px`)
-- **≤ 768px**: Stacked (`flex-direction: column`)
+- **默认**：侧栏（`240px`，固定定位，`#252525` 背景）+ 主区域（`flex: 1`，`margin-left: 240px`）
+- **≤ 768px**：上下堆叠（`flex-direction: column`）
 
 ---
 
-## 9. Iconography
+## 9. 图标
 
-All icons are **inline SVGs** — no icon library is used.
+所有图标均为**手写 inline SVG**，不使用任何图标库。
 
-| Icon | Usage | Size | Notes |
+| 图标 | 用途 | 尺寸 | 备注 |
 |---|---|---|---|
-| Chevron-left | Back navigation | `24×24` | TitleBar, Detail page |
-| Pin | Always-on-top toggle | `14×14` | Turns green (`#4caf50`) when active |
-| Heart | Favorite | `22×22` cards, `14×14` titlebar | Filled `#ff4081` when active |
-| Gear | Settings | `14×14` | |
-| Minimize | Window control | `14×14` | Horizontal line |
-| Maximize | Window control | `14×14` | Rectangle; two overlapping rects when maximized |
-| Close | Window control | `14×14` | X (two diagonal lines) |
-| Multi-image | Image count badge | `12×12` | Stacked rectangles |
-| Download | Context menu, toolbar | Varies | |
-| Upload | Drop zone | `48px` | |
+| 左箭头 | 返回导航 | `24×24` | 标题栏、详情页 |
+| 图钉 | 窗口置顶切换 | `14×14` | 激活时变绿（`#4caf50`） |
+| 心形 | 收藏 | 卡片 `22×22`，标题栏 `14×14` | 激活时填充 `#ff4081` |
+| 齿轮 | 设置 | `14×14` | |
+| 最小化 | 窗口控件 | `14×14` | 水平线 |
+| 最大化 | 窗口控件 | `14×14` | 矩形；最大化状态下为两个交叠矩形 |
+| 关闭 | 窗口控件 | `14×14` | 两条对角线 X |
+| 多图 | 图片数量角标 | `12×12` | 交叠矩形 |
+| 下载 | 右键菜单、工具栏 | 可变 | |
+| 上传 | 拖拽上传区 | `48px` | |
 
-Common styling: `stroke: #fff`, `fill: none`, `strokeWidth: 1.2–1.5`.
+通用样式：`stroke: #fff`，`fill: none`，`strokeWidth: 1.2~1.5`。
 
 ---
 
-## 10. Z-Index Scale
+## 10. Z-Index 层级
 
-| Layer | Z-Index |
+| 层级 | Z-Index |
 |---|---|
-| Title bar | 9999 |
-| Context menu overlay | 10000 |
-| Context menu | 1000 |
-| Dialog/Modal overlay | 1000 |
-| Zoom overlay | 2000 |
-| Navbar (top) | 100 |
-| Navbar (actions) | 99 |
-| Batch bar | 100 |
-| Search suggestions | 200 |
+| 标题栏 | 9999 |
+| 右键菜单遮罩 | 10000 |
+| 右键菜单 | 1000 |
+| 对话框 / 模态框遮罩 | 1000 |
+| 图片缩放叠加层 | 2000 |
+| 顶部导航栏 | 100 |
+| 操作栏 | 99 |
+| 批量操作栏 | 100 |
+| 搜索建议下拉 | 200 |
 
 ---
 
-## 11. Empty & Error States
+## 11. 空状态与错误状态
 
-- **Empty state**: `min-height: 400px`, flexbox centered, `#888` text, `18px` font
-- **Loading**: Same layout with "加载中..." text
-- **No prompt**: Centered, `#666` text, `#1a1a1a` card background
-- **Toasts**: Auto-dismissing notifications with `3000ms` duration
-  - Success: `rgba(76,175,80,0.15)` bg, `#69db7c` text
-  - Error: `rgba(244,67,54,0.15)` bg, `#ff6b6b` text
+- **空状态**：`min-height: 400px`，flexbox 居中，`#888` 文字，`18px` 字号
+- **加载中**：同上布局，显示"加载中..."
+- **无 Prompt**：居中显示，`#666` 文字，`#1a1a1a` 卡片背景
+- **Toast 通知**：自动消失，持续 `3000ms`
+  - 成功：`rgba(76,175,80,0.15)` 背景，`#69db7c` 文字
+  - 错误：`rgba(244,67,54,0.15)` 背景，`#ff6b6b` 文字
 
 ---
 
-## 12. Scrollbar & Platform
+## 12. 滚动条与平台
 
-- **Scrollbar**: No custom styling — uses platform default (dark on Windows with dark theme)
-- **Selection**: Default browser selection color
-- **Focus rings**: No custom `:focus-visible` styles beyond border-color changes
+- **滚动条**：无自定义样式——使用平台默认（Windows 暗色主题下为暗色）
+- **选中色**：使用浏览器默认
+- **聚焦环**：无明显自定义 `:focus-visible` 样式，聚焦通过边框色变化体现

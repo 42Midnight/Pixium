@@ -1,166 +1,166 @@
-# Pixium — Technical Architecture
+# Pixium — 技术架构文档
 
-## 1. High-Level Architecture
+## 1. 架构总览
 
-Pixium is a standard **Electron** desktop application with strict process isolation.
+Pixium 是标准的 **Electron** 桌面应用，遵循严格的双进程隔离模型。
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│                        MAIN PROCESS                              │
-│  electron/main.ts (entry)                                        │
+│                        主进程（Main Process）                     │
+│  electron/main.ts（入口）                                         │
 │       │                                                          │
-│       ├── electron/context.ts     Shared utilities, global state │
-│       ├── electron/ipc/index.ts   Handler registration hub       │
-│       │   ├── images.ts           Image save/delete/download     │
-│       │   ├── collections.ts      Collection CRUD, sync          │
-│       │   ├── works.ts            Work scanning, file watching   │
-│       │   ├── templates.ts        Template persistence           │
-│       │   └── settings.ts         Settings, window mgmt, export  │
-│       └── electron/preload.cjs    contextBridge (plain .cjs)     │
+│       ├── electron/context.ts     公共工具、全局状态               │
+│       ├── electron/ipc/index.ts   处理器注册中心                   │
+│       │   ├── images.ts           图片保存/删除/下载               │
+│       │   ├── collections.ts      相册 CRUD、磁盘同步              │
+│       │   ├── works.ts            作品扫描、文件监听               │
+│       │   ├── templates.ts        模板持久化                      │
+│       │   └── settings.ts         设置、窗口管理、导入导出          │
+│       └── electron/preload.cjs    contextBridge（纯 .cjs 文件）    │
 │                                                                  │
-│  Responsibilities:                                               │
-│  • Window creation (frameless, 1200×800)                         │
-│  • Custom pixium:// protocol registration                        │
-│  • File system operations (fs, path)                             │
-│  • fs.watch-based file watching                                  │
-│  • Native dialogs (save, open directory)                         │
-│  • Window state management (minimize, maximize, always-on-top)   │
+│  职责：                                                           │
+│  • 窗口创建（无边框，1200×800）                                    │
+│  • 自定义 pixium:// 协议注册                                      │
+│  • 文件系统操作（fs, path）                                       │
+│  • fs.watch 文件监听                                              │
+│  • 原生对话框（保存、选择目录）                                     │
+│  • 窗口状态管理（最小化、最大化、置顶）                              │
 └─────────────────────────────────────────────────────────────────┘
                               │
-               IPC: invoke/handle (request-response)
-                     + send/on (push to renderer)
+               IPC: invoke/handle（请求-响应）
+                     + send/on（主进程推送到渲染进程）
                               │
 ┌─────────────────────────────────────────────────────────────────┐
-│                      RENDERER PROCESS                            │
-│  src/main.tsx (React entry)                                      │
+│                      渲染进程（Renderer Process）                  │
+│  src/main.tsx（React 入口）                                       │
 │       │                                                          │
-│       ├── src/App.tsx              HashRouter, route definitions  │
-│       ├── src/services/electron.ts API wrapper (3 helpers)       │
-│       ├── src/hooks/               6 custom hooks (state + IPC)   │
-│       ├── src/utils/               6 utility modules             │
-│       ├── src/types/               5 type definition files       │
-│       └── src/components/          7 feature areas + common/     │
+│       ├── src/App.tsx              HashRouter，路由定义            │
+│       ├── src/services/electron.ts API 封装（3 个辅助函数）        │
+│       ├── src/hooks/               6 个自定义 hooks（状态 + IPC）   │
+│       ├── src/utils/               6 个工具模块                   │
+│       ├── src/types/               5 个类型定义文件                │
+│       └── src/components/          7 个功能区域 + common/         │
 └─────────────────────────────────────────────────────────────────┘
 ```
 
-**Key security properties:**
-- `contextIsolation: true`, `nodeIntegration: false` — renderer has zero Node.js access
-- `webSecurity: false` — required for `pixium://` protocol and `file:///` image loading
-- `frame: false` — custom title bar implemented in React
+**安全属性：**
+- `contextIsolation: true`，`nodeIntegration: false` — 渲染进程零 Node.js 权限
+- `webSecurity: false` — 允许加载本地 `pixium://` 和 `file:///` 图片
+- `frame: false` — React 实现自定义标题栏
 
 ---
 
-## 2. Technology Stack
+## 2. 技术栈
 
-| Layer | Technology | Version |
+| 层级 | 技术 | 版本 |
 |---|---|---|
-| Desktop Shell | Electron | 41 |
-| UI Framework | React | 19 |
-| Routing | React Router (HashRouter) | 7 |
-| Language | TypeScript | 6 |
-| Bundler | Vite (Rolldown) | 8 |
-| Compiler | React Compiler (babel-plugin-react-compiler) | 1 |
-| Packaging | electron-builder | 26 |
-| IPC | contextBridge + ipcRenderer/ipcMain | Native |
-| CSS | CSS Modules + CSS Custom Properties | Native |
-| Linting | ESLint (flat config) | 9 |
+| 桌面框架 | Electron | 41 |
+| UI 框架 | React | 19 |
+| 路由 | React Router（HashRouter） | 7 |
+| 语言 | TypeScript | 6 |
+| 构建工具 | Vite（Rolldown） | 8 |
+| 编译器 | React Compiler（babel-plugin-react-compiler） | 1 |
+| 打包 | electron-builder | 26 |
+| IPC | contextBridge + ipcRenderer/ipcMain | 原生 |
+| CSS | CSS Modules + CSS 自定义属性 | 原生 |
+| 代码检查 | ESLint（flat config） | 9 |
 
-**Zero runtime dependencies** beyond React, ReactDOM, and React Router. All file I/O, image processing, and system operations are handled in the main process via Node.js built-in modules (`fs`, `path`, `url`).
+**仅 3 个运行时依赖**：React、ReactDOM、React Router。所有文件 I/O、图片处理、系统操作均由主进程通过 Node.js 内置模块（`fs`、`path`、`url`）完成。
 
 ---
 
-## 3. IPC Communication
+## 3. IPC 通信
 
-### 3.1 Pattern
+### 3.1 通信模式
 
-All IPC uses the **invoke/handle** pattern (renderer → main request-response) except for two push channels (main → renderer). All handlers return `{ success: boolean, ... }` with a shared error shape `{ success: false, error: string }`.
+所有 IPC 使用 **invoke/handle** 模式（渲染进程 → 主进程，请求-响应），外加两条推送通道（主进程 → 渲染进程）。所有处理器返回 `{ success: boolean, ... }` 格式，错误时为 `{ success: false, error: string }`。
 
-### 3.2 Request-Response Channels (31 total)
+### 3.2 请求-响应通道（31 条）
 
-| Channel | Module | Purpose |
+| 通道名 | 所属模块 | 用途 |
 |---|---|---|
-| `save-image` | images.ts | Write PNG/JPG buffer to disk |
-| `delete-file` | images.ts | Delete single file by relative path |
-| `download-image` | images.ts | Copy all images from a work folder |
-| `save-image-as` | images.ts | Native "Save As" dialog then copy |
-| `download-single-image` | images.ts | Copy single image file to target |
-| `get-image-url` | images.ts | Resolve relative path → protocol URL |
-| `create-folder` | collections.ts | Create directory under image/ |
-| `delete-collection` | collections.ts | Remove collection + cover folders |
-| `read-collections` | collections.ts | Read collections.json, sync with disk |
-| `save-collections` | collections.ts | Write collections.json |
-| `rename-folder` | collections.ts | Rename work/collection folder, update refs |
-| `move-work-folder` | collections.ts | Move work to another collection |
-| `copy-work-folder` | collections.ts | Copy work to another collection |
-| `read-works` | works.ts | Recursively scan image/ for info.json |
-| `read-work-detail` | works.ts | Load single work's info.json |
-| `delete-files` | works.ts | Delete work folder + contents |
-| `start-watch-works` | works.ts | Start fs.watch on image/ directory |
-| `load-templates` | templates.ts | Read templates.json |
-| `save-templates` | templates.ts | Write templates.json |
-| `read-settings` | settings.ts | Read settings.json |
-| `save-settings` | settings.ts | Write settings.json |
-| `select-folder` | settings.ts | Native open-directory dialog |
-| `export-data` | settings.ts | Copy image/ + collections.json to target |
-| `import-data` | settings.ts | Merge exported data into app data |
-| `download-collection-images` | settings.ts | Batch copy collection images |
-| `toggle-always-on-top` | settings.ts | Toggle always-on-top |
-| `get-always-on-top` | settings.ts | Query always-on-top state |
-| `win-minimize` | settings.ts | Minimize window |
-| `win-maximize` | settings.ts | Toggle maximize/unmaximize |
-| `win-close` | settings.ts | Close window |
-| `win-is-maximized` | settings.ts | Query maximized state |
+| `save-image` | images.ts | 将 PNG/JPG 缓冲区写入磁盘 |
+| `delete-file` | images.ts | 按相对路径删除单个文件 |
+| `download-image` | images.ts | 复制作品文件夹内所有图片 |
+| `save-image-as` | images.ts | 原生"另存为"对话框并复制文件 |
+| `download-single-image` | images.ts | 复制单张图片到目标路径 |
+| `get-image-url` | images.ts | 相对路径 → 协议 URL |
+| `create-folder` | collections.ts | 在 image/ 下创建目录 |
+| `delete-collection` | collections.ts | 删除相册 + 封面文件夹 |
+| `read-collections` | collections.ts | 读取 collections.json，与磁盘同步 |
+| `save-collections` | collections.ts | 写入 collections.json |
+| `rename-folder` | collections.ts | 重命名作品/相册文件夹，更新所有引用 |
+| `move-work-folder` | collections.ts | 移动作品到另一相册 |
+| `copy-work-folder` | collections.ts | 复制作品到另一相册 |
+| `read-works` | works.ts | 递归扫描 image/ 中所有 info.json |
+| `read-work-detail` | works.ts | 读取单个作品的 info.json |
+| `delete-files` | works.ts | 删除作品文件夹及其内容 |
+| `start-watch-works` | works.ts | 启动对 image/ 目录的 fs.watch |
+| `load-templates` | templates.ts | 读取 templates.json |
+| `save-templates` | templates.ts | 写入 templates.json |
+| `read-settings` | settings.ts | 读取 settings.json |
+| `save-settings` | settings.ts | 写入 settings.json |
+| `select-folder` | settings.ts | 原生目录选择对话框 |
+| `export-data` | settings.ts | 导出 image/ + collections.json |
+| `import-data` | settings.ts | 导入合并数据到应用目录 |
+| `download-collection-images` | settings.ts | 批量复制相册图片 |
+| `toggle-always-on-top` | settings.ts | 切换窗口置顶 |
+| `get-always-on-top` | settings.ts | 查询窗口置顶状态 |
+| `win-minimize` | settings.ts | 最小化窗口 |
+| `win-maximize` | settings.ts | 切换最大化/还原 |
+| `win-close` | settings.ts | 关闭窗口 |
+| `win-is-maximized` | settings.ts | 查询最大化状态 |
 
-### 3.3 Push Channels (2 total)
+### 3.3 推送通道（2 条）
 
-| Channel | Trigger | Payload |
+| 通道名 | 触发条件 | 载荷 |
 |---|---|---|
-| `works-changed` | fs.watch detects info.json change | `{ filename: string }` |
-| `window-state-changed` | window maximize/unmaximize events | `{ maximized: boolean }` |
+| `works-changed` | fs.watch 检测到 info.json 变更 | `{ filename: string }` |
+| `window-state-changed` | 窗口最大化/还原事件 | `{ maximized: boolean }` |
 
-### 3.4 Preload Surface
+### 3.4 Preload 桥接层
 
-`electron/preload.cjs` exposes all 31 invoke-based methods and 2 listener-based methods on `window.electronAPI`. It is plain CommonJS (`.cjs`) — copied as-is during build, never TypeScript-compiled. The TypeScript type definition lives in `src/types/electron.d.ts`.
+`electron/preload.cjs` 将全部 31 个 invoke 方法和 2 个监听方法暴露在 `window.electronAPI` 上。该文件为纯 CommonJS（`.cjs`），构建时直接复制，不经 TypeScript 编译。TypeScript 类型定义位于 `src/types/electron.d.ts`。
 
-### 3.5 Renderer Service Layer
+### 3.5 渲染进程服务层
 
-`src/services/electron.ts` provides three thin wrappers:
-- `getElectronAPI()` — returns `window.electronAPI` (nullable)
-- `requireElectronAPI()` — throws if unavailable (non-Electron env)
-- `isElectronAvailable()` — boolean guard used throughout hooks
+`src/services/electron.ts` 提供三个薄封装：
+- `getElectronAPI()` — 返回 `window.electronAPI`（可为 null）
+- `requireElectronAPI()` — 不可用时抛出异常（非 Electron 环境）
+- `isElectronAvailable()` — 布尔值守卫，hooks 中用于判断是否可用
 
 ---
 
-## 4. Data Storage
+## 4. 数据存储
 
-### 4.1 Root Path Resolution
+### 4.1 根路径解析
 
-| Mode | App Root Path |
+| 模式 | 应用根路径 |
 |---|---|
-| Development | Project root directory |
-| Packaged / Forced packaged | `app.getPath('userData')` → `%APPDATA%/Pixium/` |
+| 开发环境 | 项目根目录 |
+| 打包 / 强制打包模式 | `app.getPath('userData')` → `%APPDATA%/Pixium/` |
 
-### 4.2 Directory Layout
+### 4.2 目录结构
 
 ```
 {appRoot}/
 ├── image/
-│   ├── {collection_folder}/           e.g. "collection_abc123/"
-│   │   ├── {work_folder}/             e.g. "1699000000_abc1234/"
-│   │   │   ├── {timestamp}_{rand}.png
-│   │   │   ├── {timestamp}_{rand}.png
-│   │   │   └── info.json              Work metadata
+│   ├── {相册文件夹}/                例："collection_abc123/"
+│   │   ├── {作品文件夹}/            例："1699000000_abc1234/"
+│   │   │   ├── {时间戳}_{随机}.png
+│   │   │   ├── {时间戳}_{随机}.png
+│   │   │   └── info.json           作品元数据
 │   │   └── ...
 │   └── collection_covers/
-│       └── {collection_folder}/
+│       └── {相册文件夹}/
 │           └── cover.jpg
 └── data/
-    ├── collections.json               All collection definitions
-    ├── settings.json                  App settings
-    └── templates.json                 Prompt templates
+    ├── collections.json             所有相册定义
+    ├── settings.json                应用设置
+    └── templates.json               Prompt 模板
 ```
 
-### 4.3 Key Data Structures
+### 4.3 核心数据结构
 
 **collections.json:**
 ```json
@@ -168,76 +168,76 @@ All IPC uses the **invoke/handle** pattern (renderer → main request-response) 
   "collections": [
     {
       "id": "collection_1700000000000",
-      "name": "My Collection",
+      "name": "我的相册",
       "folder": "collection_1700000000000",
       "cover": "pixium://image/collection_covers/.../cover.jpg",
       "coverPosition": 50,
-      "images": ["collection_1700000000000/work_folder1", ...],
-      "createdAt": { "year": 2024, "month": 1, "day": 15, "timestamp": ... }
+      "images": ["collection_1700000000000/作品文件夹1", "..."],
+      "createdAt": { "year": 2024, "month": 1, "day": 15, "timestamp": 1700000000000 }
     }
   ]
 }
 ```
 
-**info.json (per work):**
+**info.json（每个作品）：**
 ```json
 {
-  "title": "My Image",
-  "cover": "work_folder/img1.png",
-  "fileName": "img1.png",
-  "prompt": { "Positive": "...", "Negative": "...", "Seed": "12345" },
-  "images": ["img1.png", "img2.png"],
-  "createdAt": { "year": 2024, "month": 1, "day": 15, "timestamp": ... },
+  "title": "我的作品",
+  "cover": "作品文件夹/图片1.png",
+  "fileName": "图片1.png",
+  "prompt": { "正向": "...", "负向": "...", "种子": "12345" },
+  "images": ["图片1.png", "图片2.png"],
+  "createdAt": { "year": 2024, "month": 1, "day": 15, "timestamp": 1700000000000 },
   "coverPosition": 50,
-  "tags": ["portrait", "landscape"]
+  "tags": ["肖像", "风景"]
 }
 ```
 
-### 4.4 Collection-Work Relationship
+### 4.4 相册-作品关系
 
-Works are stored as subdirectories under their collection folder in `image/`. The `collections.json` `images` array tracks membership. Works without a collection go to `__uncategorized__/`. The special constant `ALL_WORKS_ID = '__all_works__'` represents a virtual cross-collection view.
+作品以子目录形式存放在对应相册文件夹下的 `image/` 中。`collections.json` 的 `images` 数组记录归属关系。无相册归属的作品存入 `__uncategorized__/`。特殊常量 `ALL_WORKS_ID = '__all_works__'` 代表跨相册的虚拟"全部作品"视图。
 
-On `read-collections`, the handler syncs with disk: reads actual directories, reconciles against the `images` array, sorts by timestamp, auto-assigns covers from the most recent work, and migrates old `file:///image/...` paths.
+`read-collections` 调用时会比对磁盘实际目录，自动修复 `images` 数组、按时间戳排序、自动从最新作品中提取封面。
 
 ---
 
-## 5. State Management
+## 5. 状态管理
 
-No global state library. Each domain has a custom hook encapsulating state + side effects:
+不使用全局状态库。每个领域通过自定义 Hook 封装状态和副作用：
 
-| Hook | State | Persistence | IPC Dependencies |
+| Hook | 状态 | 持久化方式 | IPC 依赖 |
 |---|---|---|---|
-| `useWorks` | `works[]`, `isLoading` | Disk only (via IPC) | `readWorks`, `readWorkDetail`, `startWatchWorks`, `onWorksChanged` |
-| `useCollections` | `collections[]`, `isLoading` | Disk (via IPC) | `readCollections`, `saveCollections` |
-| `useSettings` | `settings: AppSettings` | `localStorage('collectionSettings')` | None (renderer-only) |
-| `useTemplates` | `templates[]` | Dual: IPC when Electron; `localStorage` fallback | `loadTemplates`, `saveTemplates` |
-| `useFavorites` | `favorites: string[]` | `localStorage('favorites')` | None (renderer-only) |
-| `useCoverAdjust` | Transient UI state | None | None |
+| `useWorks` | `works[]`，`isLoading` | 仅磁盘（通过 IPC） | `readWorks`，`readWorkDetail`，`startWatchWorks`，`onWorksChanged` |
+| `useCollections` | `collections[]`，`isLoading` | 磁盘（通过 IPC） | `readCollections`，`saveCollections` |
+| `useSettings` | `settings: AppSettings` | `localStorage('collectionSettings')` | 无（纯渲染进程） |
+| `useTemplates` | `templates[]` | 双模式：Electron 时 IPC；浏览器时 `localStorage` 兜底 | `loadTemplates`，`saveTemplates` |
+| `useFavorites` | `favorites: string[]` | `localStorage('favorites')` | 无（纯渲染进程） |
+| `useCoverAdjust` | 临时 UI 状态 | 无 | 无 |
 
-### File Watch → UI Update Flow
+### 文件监听 → UI 更新流程
 
-1. `useWorks` calls `startWatchWorks` on mount
-2. Main process watches `image/` recursively via `fs.watch`
-3. On `info.json` change → `webContents.send('works-changed', filename)`
-4. Renderer debounces changes (300ms)
-5. ≤ 5 changes: incremental `readWorkDetail` + state patch
-6. > 5 changes: full `loadWorks()` reload
+1. `useWorks` 挂载时调用 `startWatchWorks`
+2. 主进程通过 `fs.watch` 递归监听 `image/` 目录
+3. `info.json` 变更 → `webContents.send('works-changed', filename)`
+4. 渲染进程防抖 300ms
+5. ≤ 5 个文件变更：逐个调用 `readWorkDetail` 增量更新
+6. > 5 个文件变更：全量 `loadWorks()` 重新加载
 
 ---
 
-## 6. Build Pipeline
+## 6. 构建管线
 
-### 6.1 TypeScript Configurations
+### 6.1 TypeScript 配置
 
-| Config | Target | Purpose |
+| 配置文件 | 目标 | 用途 |
 |---|---|---|
-| `tsconfig.json` | Renderer (Vite) | `noEmit: true`, includes `src/`, DOM lib |
-| `tsconfig.electron.json` | Main process | `outDir: electron-dist/`, includes `electron/**/*.ts` |
-| `tsconfig.node.json` | Config files | `noEmit: true`, for vite.config.ts |
+| `tsconfig.json` | 渲染进程（Vite 处理） | `noEmit: true`，包含 `src/`，含 DOM 库 |
+| `tsconfig.electron.json` | 主进程 | `outDir: electron-dist/`，包含 `electron/**/*.ts` |
+| `tsconfig.node.json` | 配置文件 | `noEmit: true`，用于 vite.config.ts |
 
-All share: `target: ES2020`, `module: ESNext`, `moduleResolution: bundler`, `strict: true`.
+三者共享：`target: ES2020`，`module: ESNext`，`moduleResolution: bundler`，`strict: true`。
 
-### 6.2 Development Build (`npm start`)
+### 6.2 开发构建（`npm start`）
 
 ```
 npm run build:electron
@@ -245,58 +245,58 @@ npm run build:electron
   └── cp electron/preload.cjs           → electron-dist/preload.cjs
 
 concurrently
-  ├── vite                               Dev server on localhost:5173 (HMR)
-  └── electron .                         Loads from localhost:5173
+  ├── vite                               Dev server（localhost:5173，HMR）
+  └── electron .                         从 localhost:5173 加载
 ```
 
-### 6.3 Production Build (`npm run dist:win`)
+### 6.3 生产构建（`npm run dist:win`）
 
 ```
 npm run build:electron                  electron/*.ts → electron-dist/
 vite build                              src/ → dist/
-electron-builder --win                  Packs dist/ + electron-dist/ → NSIS installer
+electron-builder --win                  打包 → NSIS 安装包
 ```
 
-### 6.4 Vite Configuration
+### 6.4 Vite 配置
 
-- **Plugin**: `@vitejs/plugin-react` + `@rolldown/plugin-babel` with React Compiler preset
-- **Base**: `'./'` (relative paths for `file://` loading in Electron)
-- **Alias**: `@` → `src/`
+- **插件**：`@vitejs/plugin-react` + `@rolldown/plugin-babel`（React Compiler 预设）
+- **Base**：`'./'`（相对路径，适配 Electron `file://` 加载）
+- **别名**：`@` → `src/`
 
-### 6.5 Scripts Reference
+### 6.5 脚本速查
 
-| Script | Behavior |
+| 命令 | 行为 |
 |---|---|
-| `npm run dev` | Vite dev server only (browser mode, no Electron) |
-| `npm run build` | Vite production build (renderer only) |
-| `npm run build:electron` | Compile main process TS → `electron-dist/` |
-| `npm start` | Full dev: build:electron + concurrently(vite + electron) |
-| `npm run start:packaged` | Same as start but `FORCE_PACKAGED_MODE=true` |
-| `npm run lint` | ESLint across project |
-| `npm run dist:win` | Full pipeline → NSIS installer in `release/` |
+| `npm run dev` | 仅 Vite dev server（浏览器模式，无 Electron） |
+| `npm run build` | Vite 生产构建（仅渲染进程） |
+| `npm run build:electron` | 编译主进程 TS → `electron-dist/` |
+| `npm start` | 全量开发模式：build:electron + concurrently(vite + electron) |
+| `npm run start:packaged` | 同 start，但 `FORCE_PACKAGED_MODE=true` |
+| `npm run lint` | ESLint 全项目检查 |
+| `npm run dist:win` | 全量管线 → NSIS 安装包输出到 `release/` |
 
 ---
 
-## 7. Routing
+## 7. 路由
 
-Uses **HashRouter** (required for Electron's `file://` loading):
+使用 **HashRouter**（Electron `file://` 加载所必需）：
 
-| Route | Component | Description |
+| 路由 | 组件 | 说明 |
 |---|---|---|
-| `/` | WaterFall | Home — collection grid |
-| `/:folderName` | WaterFall | Collection detail — works waterfall |
-| `/detail/:fileName` | Detail | Single work with image viewer + prompts |
-| `/upload` | Upload | Create or edit work |
-| `/settings` | Settings | Preferences + templates + import/export |
-| `/favorites` | Favorites | Favorited works grid |
-| `/create-collection` | CreateCollection | New collection form |
-| `/edit-collection` | EditCollection | Edit collection form |
+| `/` | WaterFall | 首页 — 相册网格 |
+| `/:folderName` | WaterFall | 相册详情 — 作品瀑布流 |
+| `/detail/:fileName` | Detail | 单个作品详情（图片查看 + Prompt） |
+| `/upload` | Upload | 创建或编辑作品 |
+| `/settings` | Settings | 设置（偏好 + 模板 + 导入导出） |
+| `/favorites` | Favorites | 收藏作品网格 |
+| `/create-collection` | CreateCollection | 新建相册表单 |
+| `/edit-collection` | EditCollection | 编辑相册表单 |
 
 ---
 
-## 8. Custom Protocol
+## 8. 自定义协议
 
-Registered in `electron/main.ts`:
+在 `electron/main.ts` 中注册：
 
 ```typescript
 protocol.registerFileProtocol('pixium', (request, callback) => {
@@ -307,89 +307,89 @@ protocol.registerFileProtocol('pixium', (request, callback) => {
 });
 ```
 
-- **Packaged mode**: Images served via `pixium:///image/...`
-- **Dev mode**: Images served via `file:///` with absolute paths
-- `getImageURL()` in `electron/context.ts` decides which protocol to use
+- **打包模式**：图片通过 `pixium:///image/...` 加载
+- **开发模式**：图片通过 `file:///` + 绝对路径加载
+- `electron/context.ts` 中的 `getImageURL()` 决定使用哪种协议
 
 ---
 
-## 9. Key Renderer Utilities
+## 9. 关键渲染进程工具
 
-### 9.1 PNG Metadata Extraction (`src/utils/pngMetadata.ts`)
+### 9.1 PNG 元数据提取（`src/utils/pngMetadata.ts`）
 
-Pure renderer-side PNG binary parser. Reads PNG chunks to find `tEXt` metadata, supports three formats:
+纯渲染进程侧的 PNG 二进制解析器。读取 PNG chunk 查找 `tEXt` 元数据，支持三种格式：
 
-1. **ComfyUI API format** — `keyword="prompt"` → JSON with KSampler/CLIPTextEncode node graph
-2. **ComfyUI Workflow format** — `keyword="workflow"` → array-based node format with `widgets_values`
-3. **Stable Diffusion WebUI format** — `keyword="parameters"` → text with "Negative prompt:" delimiter
+1. **ComfyUI API 格式** — `keyword="prompt"` → JSON 节点图，从 KSampler 追溯到 CLIPTextEncode
+2. **ComfyUI Workflow 格式** — `keyword="workflow"` → 数组格式节点，`widgets_values` 提取
+3. **Stable Diffusion WebUI 格式** — `keyword="parameters"` → 按 "Negative prompt:" 分割提取
 
-Runs via `FileReader` — no IPC needed.
+通过 `FileReader` 运行，无需 IPC。
 
-### 9.2 Search Engine (`src/utils/search.ts`)
+### 9.2 搜索引擎（`src/utils/search.ts`）
 
-Client-side search with:
-- **Trie (prefix tree)** — autocomplete suggestions on titles and tags
-- **Inverted index** — token → Set of item IDs for O(1) substring lookup
-- **CJK support** — character bigrams and single-char tokens
-- **Query syntax**: `#tagName` (tag filter), `dateYYYY.M.D-YYYY.M.D` (date range), plain text (title)
+客户端搜索，包含：
+- **Trie（前缀树）** — 标题和标签的自动补全
+- **倒排索引** — token → 条目 ID 集合，O(1) 子串查找
+- **CJK 支持** — 字符二元组和单字 token
+- **查询语法**：`#标签名`（标签过滤）、`dateYYYY.M.D-YYYY.M.D`（日期范围）、纯文本（标题）
 
 ### 9.3 React Compiler
 
-`babel-plugin-react-compiler` via `@rolldown/plugin-babel` automatically memoizes components and hooks at build time, reducing the need for manual `useMemo`/`useCallback`.
+`babel-plugin-react-compiler` 通过 `@rolldown/plugin-babel` 在构建时自动 memo 化组件和 hooks，减少手动 `useMemo`/`useCallback` 的需求。
 
 ---
 
-## 10. CSS Architecture
+## 10. CSS 架构
 
 ```
-src/styles/tokens.css     Design tokens (CSS custom properties)
-src/index.css             Global reset + body styles (dark theme)
-src/components/**/        CSS Modules (*.module.css) for scoped styles
+src/styles/tokens.css     设计 Token（CSS 自定义属性）
+src/index.css             全局重置 + body 样式（暗色主题）
+src/components/**/        CSS Modules（*.module.css）作用域样式
 ```
 
 ---
 
-## 11. Window Management
+## 11. 窗口管理
 
-- **Frameless**: `frame: false` in BrowserWindow options
-- **Custom title bar**: `TitleBar.tsx` with `WebkitAppRegion: 'drag'` for drag regions
-- **Window controls**: Custom minimize/maximize/close buttons via IPC
-- **Always-on-top**: Toggle via `toggle-always-on-top` IPC, persisted in window state
-- **Dimensions**: Default 1200×800, resizable
-
----
-
-## 12. File Watching
-
-`electron/ipc/works.ts` uses `fs.watch(imagePath, { recursive: true })`:
-
-- Only reacts to `info.json` changes (not direct image writes)
-- Pause/resume during mutations (`closeFileWatcher` / `restartFileWatcher`) to prevent race conditions during rename/move operations
-- Renderer-side debouncing: 300ms batching, incremental updates for ≤ 5 files, full reload for larger changes
+- **无边框**：BrowserWindow 选项 `frame: false`
+- **自定义标题栏**：`TitleBar.tsx`，`WebkitAppRegion: 'drag'` 实现拖拽
+- **窗口控件**：通过 IPC 实现自定义最小化/最大化/关闭按钮
+- **窗口置顶**：通过 `toggle-always-on-top` IPC 切换
+- **默认尺寸**：1200×800，可调整大小
 
 ---
 
-## 13. Dependencies
+## 12. 文件监听
 
-### Runtime (3 packages)
+`electron/ipc/works.ts` 使用 `fs.watch(imagePath, { recursive: true })`：
 
-| Package | Version | Role |
+- 仅响应 `info.json` 变更（不直接监听图片写入）
+- 在重命名/移动操作期间暂停/恢复（`closeFileWatcher` / `restartFileWatcher`），防止竞态条件
+- 渲染进程侧防抖：300ms 批量处理，≤ 5 个文件增量更新，超过则全量刷新
+
+---
+
+## 13. 依赖清单
+
+### 运行时依赖（3 个包）
+
+| 包名 | 版本 | 用途 |
 |---|---|---|
-| react | ^19.2.4 | UI framework |
-| react-dom | ^19.2.4 | React DOM renderer |
-| react-router-dom | ^7.14.0 | Client-side routing |
+| react | ^19.2.4 | UI 框架 |
+| react-dom | ^19.2.4 | React DOM 渲染器 |
+| react-router-dom | ^7.14.0 | 客户端路由 |
 
-### Dev (18 packages)
+### 开发依赖（18 个包）
 
-| Package | Version | Role |
+| 包名 | 版本 | 用途 |
 |---|---|---|
-| electron | ^41.1.1 | Desktop shell |
-| electron-builder | ^26.8.1 | NSIS installer packaging |
-| vite | ^8.0.1 | Bundler + dev server |
-| @vitejs/plugin-react | ^6.0.1 | Vite React plugin |
-| babel-plugin-react-compiler | ^1.0.0 | Auto-memoization |
-| @rolldown/plugin-babel | ^0.2.1 | Babel for Vite/Rolldown |
-| typescript | ^6.0.3 | Type checker + compiler |
-| eslint | ^9.39.4 | Linter |
-| concurrently | ^9.2.1 | Parallel process runner (dev) |
-| cross-env | ^10.1.0 | Cross-platform env vars |
+| electron | ^41.1.1 | 桌面框架 |
+| electron-builder | ^26.8.1 | NSIS 安装包打包 |
+| vite | ^8.0.1 | 构建工具 + Dev Server |
+| @vitejs/plugin-react | ^6.0.1 | Vite React 插件 |
+| babel-plugin-react-compiler | ^1.0.0 | 自动 memo 化 |
+| @rolldown/plugin-babel | ^0.2.1 | Vite/Rolldown Babel 集成 |
+| typescript | ^6.0.3 | 类型检查器 + 编译器 |
+| eslint | ^9.39.4 | 代码检查 |
+| concurrently | ^9.2.1 | 并行进程运行器（开发用） |
+| cross-env | ^10.1.0 | 跨平台环境变量 |
