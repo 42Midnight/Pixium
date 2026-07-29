@@ -172,32 +172,119 @@ pixium/
 
 ## Getting Started
 
+This section walks you through cloning the repository and setting up a working development environment from scratch.
+
 ### Prerequisites
 
-- Node.js 18+
-- npm
+| Tool         | Required Version | Notes                                          |
+| ------------ | ---------------- | ---------------------------------------------- |
+| Node.js      | ≥ 18 (LTS 22 recommended) | Download from [nodejs.org](https://nodejs.org) |
+| npm          | bundled with Node.js | Or use pnpm / yarn                            |
+| Git          | any recent version | Required to clone the repository               |
 
-### Install & Run
+> **Windows only.** The app ships an NSIS installer targeting Windows x64. Development on macOS / Linux is untested — the Electron shell will likely launch but platform-specific paths may not resolve correctly.
+
+### 1. Clone the Repository
 
 ```bash
-# Install dependencies
-npm install
-
-# Launch the app (debug mode)
-npm run start:packaged
-
-# Lint
-npm run lint
+git clone https://github.com/42Midnight/Pixium.git
+cd Pixium
 ```
 
-### Build
+### 2. Install Dependencies
 
 ```bash
-# Build Windows installer (NSIS)
+npm install
+```
+
+This installs everything needed:
+- **Runtime** — React 19, React Router v7
+- **Dev tooling** — Vite 8, TypeScript 6, ESLint, Electron 41
+- **Packaging** — electron-builder
+
+### 3. Development Workflow
+
+The project has two compilation targets that run side-by-side during development:
+
+| Target              | Source                | Output              | Bundler      |
+| ------------------- | --------------------- | ------------------- | ------------ |
+| Renderer (UI)       | `src/`                | `dist/`             | Vite         |
+| Main process (Node) | `electron/`           | `electron-dist/`    | `tsc`        |
+
+Three npm scripts cover the typical dev loop:
+
+```bash
+# --- Option A: Full dev mode with hot reload ---
+# Starts Vite dev server + Electron together. Vite HMR keeps the
+# renderer live; restart the Electron window with Ctrl+R / F5.
+npm start
+
+# --- Option B: Packaged-mode simulation ---
+# Same as above but sets FORCE_PACKAGED_MODE=true so the app reads
+# data from %APPDATA%/Pixium/ instead of the repo root.
+npm run start:packaged
+
+# --- Option C: Browser-only UI development ---
+# Opens the Vite dev server in a browser. Electron APIs are
+# unavailable — use this for rapid component/stylesheet iteration.
+npm run dev
+```
+
+**Typical workflow:**
+
+1. Run `npm start` to launch the full Electron app.
+2. Edit files under `src/` — the renderer hot-reloads automatically.
+3. If you change files under `electron/`, kill the process and re-run `npm start` (or just `npm run build:electron && electron .`).
+4. Run `npm run lint` before committing to catch type and style issues.
+
+### 4. Build the Installer
+
+```bash
+# Compile TypeScript, bundle with Vite, then package with electron-builder
 npm run dist:win
 ```
 
-Output: `release/` directory.
+The NSIS installer lands in `release/` as `Pixium-<version>-x64-setup.exe`.
+
+**Under the hood** — `npm run dist:win` runs these steps in order:
+
+1. `npm run build:electron` — compiles `electron/*.ts` → `electron-dist/`
+2. `vite build` — bundles `src/` → `dist/`
+3. `electron-builder --win` — wraps both into a Windows installer
+
+### 5. Verify Everything Works
+
+After cloning and running `npm install`, confirm the toolchain is healthy:
+
+```bash
+# Type-check the renderer (no emit)
+npx tsc --noEmit
+
+# Type-check the Electron main process
+npx tsc -p tsconfig.electron.json --noEmit
+
+# Lint the full project
+npm run lint
+
+# Build the renderer bundle
+npm run build
+
+# Compile the Electron main process
+npm run build:electron
+```
+
+All five commands should exit cleanly with no errors. If they pass, `npm start` will launch the app.
+
+### Common Issues
+
+| Symptom                                      | Likely Fix                                                   |
+| -------------------------------------------- | ------------------------------------------------------------ |
+| `Cannot find module 'electron'`              | Run `npm install` — Electron is a devDependency              |
+| `'electron' is not recognized`               | Add `node_modules/.bin` to PATH or use `npx electron .`      |
+| White screen on launch                       | Vite dev server hasn't started — wait a few seconds, then refresh with Ctrl+R |
+| `EPERM` or permission errors on Windows      | Close any File Explorer windows inside the project folder    |
+| Build fails with memory errors               | Set `NODE_OPTIONS=--max-old-space-size=4096` before building |
+| TypeScript errors about missing DOM types    | Make sure `"lib": ["ES2020", "DOM", "DOM.Iterable"]` is present in tsconfig.json |
 
 ## Settings
 
