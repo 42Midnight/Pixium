@@ -129,8 +129,8 @@
 }
 
 .coverPreview {
-  width: 180px;
-  height: 180px;
+  width: 400px;
+  height: 400px;
   border-radius: var(--radius-lg);
   overflow: hidden;
   position: relative;

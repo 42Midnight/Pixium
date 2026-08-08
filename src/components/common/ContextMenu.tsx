@@ -46,7 +46,7 @@ export default function ContextMenu({ x, y, items, onClose }: ContextMenuProps) 
   return (
     <>
       <div className={styles.contextMenuOverlay} onClick={onClose} />
-      <div ref={menuRef} className={styles.contextMenu} style={{ left: x, top: y, position: 'fixed', zIndex: 1000 }}>
+      <div ref={menuRef} className={styles.contextMenu} style={{ left: x, top: y, position: 'fixed', zIndex: 10001 }}>
         {items.map((item, index) => (
           <div
             key={index}
