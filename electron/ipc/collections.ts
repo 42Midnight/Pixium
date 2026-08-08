@@ -265,46 +265,56 @@ export function registerCollectionHandlers(): void {
 
   ipcMain.handle('move-work-folder', async (_event, workId: string, targetCollectionId: string) => {
     try {
+      const ALL_WORKS_ID = '__all_works__';
+      const UNCATEGORIZED_FOLDER = '__uncategorized__';
       const appRootPath = getAppRootPath();
       const imageDir = path.join(appRootPath, 'image');
       const collectionsFile = path.join(appRootPath, 'data', 'collections.json');
 
-      if (!fs.existsSync(collectionsFile)) {
-        return { success: false, error: '收藏夹数据文件不存在' };
+      let data: any = { collections: [] };
+      if (fs.existsSync(collectionsFile)) {
+        data = JSON.parse(fs.readFileSync(collectionsFile, 'utf-8'));
       }
 
-      const data = JSON.parse(fs.readFileSync(collectionsFile, 'utf-8'));
-      const targetCollection = data.collections.find((c: any) => c.id === targetCollectionId);
-      if (!targetCollection) {
+      const movingToAllWorks = targetCollectionId === ALL_WORKS_ID;
+
+      // Find target collection (skip for "所有作品")
+      const targetCollection = movingToAllWorks
+        ? null
+        : data.collections.find((c: any) => c.id === targetCollectionId);
+      if (!movingToAllWorks && !targetCollection) {
         return { success: false, error: '目标收藏夹不存在' };
       }
 
       const workBaseName = workId.split('/').pop()!;
+
+      // Find source collection (works in "所有作品" are NOT in any collection's images)
       const currentCollection = data.collections.find((c: any) =>
         c.images?.some((img: string) => img === workId || img.split('/').pop() === workBaseName)
       );
 
-      if (!currentCollection) {
-        return { success: false, error: '作品不在任何收藏夹中' };
-      }
-      if (currentCollection.id === targetCollection.id) {
+      // If moving within the same real collection, no-op
+      if (currentCollection && !movingToAllWorks && currentCollection.id === targetCollection!.id) {
         return { success: true, message: '作品已在目标收藏夹中' };
       }
 
-      const targetFolderName = targetCollection.folder || `collection_${targetCollection.id}`;
+      // Determine target folder
+      const targetFolderName = movingToAllWorks
+        ? UNCATEGORIZED_FOLDER
+        : (targetCollection!.folder || `collection_${targetCollection!.id}`);
       const targetFolderPath = path.join(imageDir, targetFolderName);
       ensureDir(targetFolderPath);
 
-      // Find work folder
+      // Find work folder on disk
       let workFolderPath = path.join(imageDir, workId);
       if (!fs.existsSync(workFolderPath)) {
         for (const item of fs.readdirSync(imageDir)) {
+          if (item === 'collection_covers') continue;
           const itemPath = path.join(imageDir, item);
-          if (fs.statSync(itemPath).isDirectory()) {
-            const nested = path.join(itemPath, workBaseName);
-            if (fs.existsSync(nested)) { workFolderPath = nested; break; }
-            if (item === workBaseName) { workFolderPath = itemPath; break; }
-          }
+          if (!fs.statSync(itemPath).isDirectory()) continue;
+          const nested = path.join(itemPath, workBaseName);
+          if (fs.existsSync(nested)) { workFolderPath = nested; break; }
+          if (item === workBaseName) { workFolderPath = itemPath; break; }
         }
       }
 
@@ -317,13 +327,14 @@ export function registerCollectionHandlers(): void {
         return { success: false, error: '目标位置已存在同名文件夹' };
       }
 
-      // Move folder
+      // Read source info.json
       let workInfo: any = null;
       const sourceInfoPath = path.join(workFolderPath, 'info.json');
       if (fs.existsSync(sourceInfoPath)) {
         workInfo = JSON.parse(fs.readFileSync(sourceInfoPath, 'utf-8'));
       }
 
+      // Move folder on disk
       closeFileWatcher();
       try {
         fs.renameSync(workFolderPath, targetWorkPath);
@@ -337,7 +348,11 @@ export function registerCollectionHandlers(): void {
       if (workInfo && fs.existsSync(targetInfoPath)) {
         const info = JSON.parse(fs.readFileSync(targetInfoPath, 'utf-8'));
         info.folder = newFolder;
-        info.collectionId = targetCollection.id;
+        if (!movingToAllWorks) {
+          info.collectionId = targetCollection!.id;
+        } else {
+          delete info.collectionId;
+        }
         if (info.images?.length > 0) {
           info.cover = getImageURL(`image/${newFolder}/${info.images[0]}`);
         }
@@ -346,13 +361,23 @@ export function registerCollectionHandlers(): void {
 
       // Update collections.json
       const newWorkId = newFolder;
-      for (const c of data.collections) {
-        if (c.id === currentCollection.id) {
-          c.images = (c.images || []).filter((img: string) => img !== workId && img.split('/').pop() !== workBaseName);
+      // Remove from source collection (if any)
+      if (currentCollection) {
+        for (const c of data.collections) {
+          if (c.id === currentCollection.id) {
+            c.images = (c.images || []).filter(
+              (img: string) => img !== workId && img.split('/').pop() !== workBaseName
+            );
+          }
         }
-        if (c.id === targetCollection.id) {
-          if (!c.images.some((img: string) => img === newWorkId || img.split('/').pop() === workBaseName)) {
-            c.images.push(newWorkId);
+      }
+      // Add to target collection (skip for "所有作品" — uncategorized)
+      if (!movingToAllWorks) {
+        for (const c of data.collections) {
+          if (c.id === targetCollection!.id) {
+            if (!c.images.some((img: string) => img === newWorkId || img.split('/').pop() === workBaseName)) {
+              c.images.push(newWorkId);
+            }
           }
         }
       }
@@ -362,8 +387,8 @@ export function registerCollectionHandlers(): void {
       return {
         success: true,
         newWorkId,
-        oldCollectionId: currentCollection.id,
-        newCollectionId: targetCollection.id,
+        oldCollectionId: currentCollection?.id || ALL_WORKS_ID,
+        newCollectionId: movingToAllWorks ? ALL_WORKS_ID : targetCollection!.id,
       };
     } catch (error: any) {
       console.error('move-work-folder error:', error);
@@ -373,22 +398,30 @@ export function registerCollectionHandlers(): void {
 
   ipcMain.handle('copy-work-folder', async (_event, workId: string, targetCollectionId: string) => {
     try {
+      const ALL_WORKS_ID = '__all_works__';
+      const UNCATEGORIZED_FOLDER = '__uncategorized__';
       const appRootPath = getAppRootPath();
       const imageDir = path.join(appRootPath, 'image');
       const collectionsFile = path.join(appRootPath, 'data', 'collections.json');
 
-      if (!fs.existsSync(collectionsFile)) {
-        return { success: false, error: '收藏夹数据文件不存在' };
+      let data: any = { collections: [] };
+      if (fs.existsSync(collectionsFile)) {
+        data = JSON.parse(fs.readFileSync(collectionsFile, 'utf-8'));
       }
 
-      const data = JSON.parse(fs.readFileSync(collectionsFile, 'utf-8'));
-      const targetCollection = data.collections.find((c: any) => c.id === targetCollectionId);
-      if (!targetCollection) {
+      const copyingToAllWorks = targetCollectionId === ALL_WORKS_ID;
+
+      // Find target collection (skip for "所有作品")
+      const targetCollection = copyingToAllWorks
+        ? null
+        : data.collections.find((c: any) => c.id === targetCollectionId);
+      if (!copyingToAllWorks && !targetCollection) {
         return { success: false, error: '目标收藏夹不存在' };
       }
 
       const workBaseName = workId.split('/').pop()!;
 
+      // Find work folder on disk
       let workFolderPath = path.join(imageDir, workId);
       if (!fs.existsSync(workFolderPath)) {
         for (const item of fs.readdirSync(imageDir)) {
@@ -404,7 +437,9 @@ export function registerCollectionHandlers(): void {
         return { success: false, error: '作品文件夹不存在' };
       }
 
-      const targetFolderName = targetCollection.folder || `collection_${targetCollection.id}`;
+      const targetFolderName = copyingToAllWorks
+        ? UNCATEGORIZED_FOLDER
+        : (targetCollection!.folder || `collection_${targetCollection!.id}`);
       const targetFolderPath = path.join(imageDir, targetFolderName);
       ensureDir(targetFolderPath);
 
@@ -420,7 +455,11 @@ export function registerCollectionHandlers(): void {
       if (fs.existsSync(targetInfoPath)) {
         const info = JSON.parse(fs.readFileSync(targetInfoPath, 'utf-8'));
         info.folder = newFolder;
-        info.collectionId = targetCollection.id;
+        if (!copyingToAllWorks) {
+          info.collectionId = targetCollection!.id;
+        } else {
+          delete info.collectionId;
+        }
         if (info.images?.length > 0) {
           info.cover = getImageURL(`image/${newFolder}/${info.images[0]}`);
         }
@@ -428,10 +467,13 @@ export function registerCollectionHandlers(): void {
       }
 
       const newWorkId = newFolder;
-      for (const c of data.collections) {
-        if (c.id === targetCollection.id) {
-          if (!c.images.some((img: string) => img === newWorkId || img.split('/').pop() === workBaseName)) {
-            c.images.push(newWorkId);
+      // Add to target collection (skip for "所有作品" — uncategorized)
+      if (!copyingToAllWorks) {
+        for (const c of data.collections) {
+          if (c.id === targetCollection!.id) {
+            if (!c.images.some((img: string) => img === newWorkId || img.split('/').pop() === workBaseName)) {
+              c.images.push(newWorkId);
+            }
           }
         }
       }

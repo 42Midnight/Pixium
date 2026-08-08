@@ -666,6 +666,14 @@ export default function WaterFall() {
             <h3 className={styles.deleteConfirmTitle}>{confirmAction === 'copy' ? '复制到...' : '移动到...'}</h3>
             <p className={styles.deleteConfirmMessage}>请选择目标相册：</p>
             <div className={styles.moveCollectionList}>
+              {activeCollection?.id !== ALL_WORKS_ID && (
+                <div
+                  className={`${styles.moveCollectionItem} ${selectedTargetCollection?.id === ALL_WORKS_ID ? styles.selected : ''}`}
+                  onClick={() => setSelectedTargetCollection({ id: ALL_WORKS_ID, name: ALL_WORKS_NAME, folder: ALL_WORKS_ID, images: [], cover: null } as Collection)}
+                >
+                  {ALL_WORKS_NAME}（未分类）
+                </div>
+              )}
               {collections.filter(c => c.id !== activeCollection?.id).map(c => (
                 <div key={c.id} className={`${styles.moveCollectionItem} ${selectedTargetCollection?.id === c.id ? styles.selected : ''}`}
                   onClick={() => setSelectedTargetCollection(c)}>{c.name}</div>
