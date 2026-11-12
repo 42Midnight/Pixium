@@ -60,7 +60,7 @@ export default function WaterFall() {
     [folderName, collections, allWorksCollection],
   );
 
-  const [columns, setColumns] = useState<number[]>([]);
+  const [, setColumns] = useState<number[]>([]);
   const [columnCount, setColumnCount] = useState(6);
   const [cardPositions, setCardPositions] = useState<Record<string, CardPosition>>({});
   const [isBatchMode, setIsBatchMode] = useState(false);
@@ -403,7 +403,7 @@ export default function WaterFall() {
     const sorted = [...collWorks].sort((a, b) => {
       const da = a.createdAt, db = b.createdAt;
       if (!da || !db) return 0;
-      let r = da.year - db.year || da.month - db.month || da.day - db.day;
+      const r = da.year - db.year || da.month - db.month || da.day - db.day;
       return sortOrder === 'asc' ? r : -r;
     });
 
@@ -532,7 +532,7 @@ export default function WaterFall() {
                 workCount={isVirtual ? works.length : (collection.images?.length || 0)}
                 onClick={handleCollectionClick}
                 onContextMenu={isVirtual
-                  ? (e, c) => { e.preventDefault(); e.stopPropagation(); }
+                  ? (e, _c) => { e.preventDefault(); e.stopPropagation(); }
                   : (e, c) => { e.preventDefault(); e.stopPropagation(); setCollectionContextMenu({ x: e.clientX, y: e.clientY, collection: c }); }
                 }
                 onDragStart={isVirtual ? () => {} : handleCollectionDragStart}

@@ -1,6 +1,5 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { useSettings } from '../../hooks/useSettings';
 import { useCollections } from '../../hooks/useCollections';
 import { fileToBuffer, sanitizeFolderName } from '../../utils/file';
 import { extractPromptFromPNG } from '../../utils/pngMetadata';
@@ -17,7 +16,6 @@ import styles from './Upload.module.css';
 export default function Upload() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { settings } = useSettings();
   const { collections, loadCollections } = useCollections();
 
   const editMode = location.state?.editMode === true;
@@ -260,7 +258,7 @@ export default function Upload() {
       promptFields.forEach(f => { if (f.name && f.value) prompt[f.name] = f.value; });
 
       let folderName: string | null = null;
-      let imageFileNames: string[] = [];
+      const imageFileNames: string[] = [];
       const batchWorkPaths: string[] = [];
 
       if (batchImport) {

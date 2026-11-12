@@ -4,7 +4,10 @@
   "version": "1.0.0",
   "main": "electron-dist/main.js",
   "type": "module",
-  "description": "Pixium",
+  "description": "Local-first desktop image manager: albums, waterfall browsing and structured text fields.",
+  "engines": {
+    "node": "^20.19.0 || >=22.12.0"
+  },
   "repository": {
     "type": "git",
     "url": "https://github.com/42Midnight/Pixium.git"
@@ -76,19 +79,20 @@
     "eslint-plugin-react-hooks": "^7.0.1",
     "eslint-plugin-react-refresh": "^0.5.2",
     "globals": "^17.4.0",
-    "ts-node": "^10.9.2",
-    "tsx": "^4.22.3",
     "typescript": "^6.0.3",
+    "typescript-eslint": "^8.72.2",
     "vite": "^8.0.1"
   },
   "bugs": {
     "url": "https://github.com/42Midnight/Pixium/issues"
   },
   "keywords": [
-    "comfyui",
-    "prompt",
-    "manager",
-    "stable-diffusion",
-    "electron"
+    "electron",
+    "react",
+    "typescript",
+    "image-manager",
+    "gallery",
+    "pixiv",
+    "desktop-app"
   ]
 }

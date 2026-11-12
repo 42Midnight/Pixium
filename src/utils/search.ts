@@ -64,7 +64,7 @@ function tokenize(text: string): string[] {
   const lower = text.toLowerCase();
   // Split on whitespace and common punctuation
   const tokens = lower
-    .split(/[\s,./;:'"!?()\[\]{}<>，。、；：！？（）【】《》""''…—\-+|=*&^%$#@~`\\]+/)
+    .split(/[\s,./;:'"!?()[\]{}<>，。、；：！？（）【】《》""''…—\-+|=*&^%$#@~`\\]+/)
     .filter(t => t.length > 0);
 
   // For tokens containing CJK characters, also generate bigrams

@@ -55,7 +55,7 @@ export function registerImageHandlers(): void {
 
   ipcMain.handle('save-image-as', async (_event, imagePath: string) => {
     try {
-      let sourcePath = resolveImagePath(imagePath);
+      const sourcePath = resolveImagePath(imagePath);
       if (!fs.existsSync(sourcePath)) {
         return { success: false, error: '图片文件不存在' };
       }
@@ -84,7 +84,7 @@ export function registerImageHandlers(): void {
 
   ipcMain.handle('download-single-image', async (_event, imagePath: string, targetPath: string, fileName: string) => {
     try {
-      let sourcePath = resolveImagePath(imagePath);
+      const sourcePath = resolveImagePath(imagePath);
       if (!fs.existsSync(sourcePath)) {
         return { success: false, error: '图片文件不存在' };
       }

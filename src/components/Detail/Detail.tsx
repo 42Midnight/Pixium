@@ -7,7 +7,7 @@ import TitleBar from '../common/TitleBar';
 import ConfirmDialog from '../common/ConfirmDialog';
 import ImageViewer from './ImageViewer';
 import PromptCard from './PromptCard';
-import { tagColor } from '../common/TagInput';
+import { tagColor } from '../../utils/format';
 import type { WorkData } from '../../types';
 import styles from './Detail.module.css';
 
@@ -196,7 +196,6 @@ export default function Detail() {
           <ImageViewer
             images={workData.images}
             title={workData.title}
-            folder={workData.folder}
             coverUrl={workData.cover}
             downloadPath={settings.downloadPath}
             showFilename={settings.showImageFilename}

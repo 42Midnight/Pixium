@@ -379,7 +379,7 @@ src/components/**/        CSS Modules（*.module.css）作用域样式
 | react-dom | ^19.2.4 | React DOM 渲染器 |
 | react-router-dom | ^7.14.0 | 客户端路由 |
 
-### 开发依赖（18 个包）
+### 开发依赖（19 个包）
 
 | 包名 | 版本 | 用途 |
 |---|---|---|
@@ -387,9 +387,18 @@ src/components/**/        CSS Modules（*.module.css）作用域样式
 | electron-builder | ^26.8.1 | NSIS 安装包打包 |
 | vite | ^8.0.1 | 构建工具 + Dev Server |
 | @vitejs/plugin-react | ^6.0.1 | Vite React 插件 |
+| @babel/core | ^7.29.0 | Babel 核心（React Compiler 前置） |
 | babel-plugin-react-compiler | ^1.0.0 | 自动 memo 化 |
 | @rolldown/plugin-babel | ^0.2.1 | Vite/Rolldown Babel 集成 |
 | typescript | ^6.0.3 | 类型检查器 + 编译器 |
 | eslint | ^9.39.4 | 代码检查 |
+| @eslint/js | ^9.39.4 | ESLint 官方推荐规则集 |
+| typescript-eslint | ^8.72.2 | TypeScript 解析器与规则 |
+| eslint-plugin-react-hooks | ^7.0.1 | React Hooks 规则 |
+| eslint-plugin-react-refresh | ^0.5.2 | React Fast Refresh 规则 |
+| globals | ^17.4.0 | browser / node 全局变量定义 |
 | concurrently | ^9.2.1 | 并行进程运行器（开发用） |
 | cross-env | ^10.1.0 | 跨平台环境变量 |
+| @types/node | ^25.9.1 | Node.js 类型定义 |
+| @types/react | ^19.2.14 | React 类型定义 |
+| @types/react-dom | ^19.2.3 | React DOM 类型定义 |

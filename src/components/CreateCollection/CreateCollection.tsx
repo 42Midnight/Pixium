@@ -5,7 +5,6 @@ import TitleBar from '../common/TitleBar';
 import { useSettings } from '../../hooks/useSettings';
 import { fileToBuffer, sanitizeFolderName } from '../../utils/file';
 import { getNow } from '../../utils/format';
-import { isElectronAvailable } from '../../services/electron';
 import type { Collection } from '../../types';
 import styles from './CreateCollection.module.css';
 

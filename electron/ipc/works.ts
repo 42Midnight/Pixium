@@ -61,7 +61,7 @@ export function registerWorkHandlers(): void {
   ipcMain.handle('read-work-detail', async (_event, fileName: string) => {
     try {
       const imageDir = path.join(getAppRootPath(), 'image');
-      let cleanFileName = fileName.startsWith('image/') ? fileName.substring(6) : fileName;
+      const cleanFileName = fileName.startsWith('image/') ? fileName.substring(6) : fileName;
       const pathParts = cleanFileName.split('/');
 
       let infoFilePath: string;

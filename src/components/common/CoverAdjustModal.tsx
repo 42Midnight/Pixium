@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
-import { getCoverBackgroundPosition, getCoverImageTransform } from '../../utils/format';
+import { getCoverImageTransform } from '../../utils/format';
 import styles from './common.module.css';
 
 interface ImageDimensions {
@@ -82,7 +82,6 @@ export default function CoverAdjustModal({
 
   if (!imageUrl) return null;
 
-  const bgPos = getCoverBackgroundPosition(position, dimensions);
   const imgTransform = getCoverImageTransform(position, dimensions);
 
   return (

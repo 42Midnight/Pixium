@@ -5,13 +5,12 @@ import styles from './Detail.module.css';
 interface ImageViewerProps {
   images: string[];
   title: string;
-  folder?: string;
   coverUrl: string;
   downloadPath: string;
   showFilename?: boolean;
 }
 
-export default function ImageViewer({ images, title, folder, coverUrl, downloadPath, showFilename = true }: ImageViewerProps) {
+export default function ImageViewer({ images, title, coverUrl, downloadPath, showFilename = true }: ImageViewerProps) {
   const [isZoomed, setIsZoomed] = useState(false);
   const [zoomedPath, setZoomedPath] = useState('');
   const [zoomedRawPath, setZoomedRawPath] = useState('');

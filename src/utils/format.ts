@@ -56,3 +56,7 @@ export function getNow(): DateInfo {
     timestamp: Date.now(),
   };
 }
+
+export function tagColor(_tag: string): string {
+  return '#3a3a3a';
+}

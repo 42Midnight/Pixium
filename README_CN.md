@@ -180,9 +180,11 @@ pixium/
 
 | 工具           | 所需版本                  | 备注                                          |
 | -------------- | ----------------------- | ---------------------------------------------- |
-| Node.js        | ≥ 18（推荐 LTS 22）      | 从 [nodejs.org](https://nodejs.org) 下载安装    |
+| Node.js        | ≥ 20.19（推荐 LTS 22）    | 从 [nodejs.org](https://nodejs.org) 下载安装    |
 | npm            | 随 Node.js 附带          | 也可使用 pnpm / yarn                            |
 | Git            | 任意较新版本              | 用于克隆仓库                                    |
+
+> Vite 8 要求 Node.js `^20.19.0 || >=22.12.0`。Node 18 及更早版本会导致安装失败或无法启动开发服务器。
 
 > **仅限 Windows。** 应用目前只发布 Windows x64 的 NSIS 安装包。在 macOS / Linux 上进行开发未经测试 — Electron 壳能启动，但平台相关的路径可能无法正确解析。
 
@@ -196,13 +198,24 @@ cd Pixium
 ### 2. 安装依赖
 
 ```bash
-npm install
+npm ci
 ```
+
+`npm ci` 会严格按照 `package-lock.json` 安装锁定版本。只有需要增删依赖时才使用 `npm install <包名>`。
 
 该命令会安装全部所需内容：
 - **运行时** — React 19、React Router v7
 - **开发工具** — Vite 8、TypeScript 6、ESLint、Electron 41
 - **打包工具** — electron-builder
+
+> **如果 Electron 二进制下载失败**（报错 `unable to verify the first certificate`、`ECONNRESET`，或 `postinstall` 长时间无响应），说明安装程序正在访问 GitHub。为本机设置一次镜像地址，重开终端后重新安装：
+>
+> ```powershell
+> setx ELECTRON_MIRROR "https://npmmirror.com/mirrors/electron/"
+> setx ELECTRON_BUILDER_BINARIES_MIRROR "https://npmmirror.com/mirrors/electron-builder-binaries/"
+> ```
+>
+> 第二个变量只在执行 `npm run dist:win` 时使用（electron-builder 需要从 GitHub 下载 NSIS 辅助文件）。
 
 ### 3. 开发流程
 
@@ -256,7 +269,7 @@ NSIS 安装包输出到 `release/` 目录，文件名为 `Pixium-<version>-x64-s
 
 ### 5. 验证环境
 
-克隆并执行 `npm install` 后，通过以下命令确认工具链正常：
+克隆并执行 `npm ci` 后，通过以下命令确认工具链正常：
 
 ```bash
 # 类型检查渲染进程（不输出文件）
@@ -275,13 +288,15 @@ npm run build
 npm run build:electron
 ```
 
-以上五条命令均应正常退出，无报错。全部通过后执行 `npm start` 即可启动应用。
+以上五条命令均应正常退出。`npm run lint` 必须为 0 error；它可能打印少量 `react-hooks/exhaustive-deps` warning，这是有意保留的窄依赖回调，属预期现象。全部通过后执行 `npm start` 即可启动应用。
 
 ### 常见问题
 
 | 现象                                        | 可能原因与解决方法                                             |
 | ------------------------------------------- | ------------------------------------------------------------ |
-| `Cannot find module 'electron'`             | 执行 `npm install` — Electron 是 devDependency                |
+| `Cannot find module 'electron'`             | 执行 `npm ci` — Electron 是 devDependency                    |
+| `npm ci` 下载 Electron 失败                  | 设置 `ELECTRON_MIRROR`（见[安装依赖](#2-安装依赖)）后重新安装     |
+| `Unsupported engine` / Vite 无法启动         | Node.js 版本过低 — 安装 Node 22 LTS（Vite 8 要求 ≥ 20.19）     |
 | `'electron' is not recognized`              | 将 `node_modules/.bin` 加入 PATH，或使用 `npx electron .`      |
 | 启动后白屏                                   | Vite dev server 尚未就绪 — 稍等几秒后按 Ctrl+R 刷新             |
 | Windows 上出现 `EPERM` 或权限错误             | 关闭项目文件夹内的所有文件资源管理器窗口                          |
@@ -294,7 +309,7 @@ npm run build:electron
 
 | 命令                       | 说明                                                      |
 | -------------------------- | -------------------------------------------------------- |
-| `npm install`              | 安装全部依赖                                                |
+| `npm ci`                   | 按 lockfile 安装精确版本依赖                                  |
 | `npm start`                | 完整开发模式 — Vite 热更新 + Electron                        |
 | `npm run start:packaged`   | 模拟打包模式（数据从 `%APPDATA%` 读取）                       |
 | `npm run dev`              | 纯浏览器 UI 开发（Electron API 不可用）                       |

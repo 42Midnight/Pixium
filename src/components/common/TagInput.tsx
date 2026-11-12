@@ -1,14 +1,11 @@
 import { useState, useRef, useCallback, type KeyboardEvent, type ClipboardEvent } from 'react';
+import { tagColor } from '../../utils/format';
 import styles from './TagInput.module.css';
 
 interface TagInputProps {
   tags: string[];
   onChange: (tags: string[]) => void;
   placeholder?: string;
-}
-
-function tagColor(_name: string): string {
-  return '#3a3a3a';
 }
 
 export default function TagInput({ tags, onChange, placeholder = '输入标签，按回车添加' }: TagInputProps) {
@@ -88,5 +85,3 @@ export default function TagInput({ tags, onChange, placeholder = '输入标签�
     </div>
   );
 }
-
-export { tagColor };

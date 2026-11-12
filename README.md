@@ -178,9 +178,11 @@ This section walks you through cloning the repository and setting up a working d
 
 | Tool         | Required Version | Notes                                          |
 | ------------ | ---------------- | ---------------------------------------------- |
-| Node.js      | ≥ 18 (LTS 22 recommended) | Download from [nodejs.org](https://nodejs.org) |
+| Node.js      | ≥ 20.19 (LTS 22 recommended) | Download from [nodejs.org](https://nodejs.org) |
 | npm          | bundled with Node.js | Or use pnpm / yarn                            |
 | Git          | any recent version | Required to clone the repository               |
+
+> Vite 8 requires Node.js `^20.19.0 || >=22.12.0`. Node 18 or older will fail to install and start the dev server.
 
 > **Windows only.** The app ships an NSIS installer targeting Windows x64. Development on macOS / Linux is untested — the Electron shell will likely launch but platform-specific paths may not resolve correctly.
 
@@ -194,13 +196,24 @@ cd Pixium
 ### 2. Install Dependencies
 
 ```bash
-npm install
+npm ci
 ```
+
+`npm ci` installs the exact versions pinned in `package-lock.json`. Use `npm install <package>` only when you intentionally add or change a dependency.
 
 This installs everything needed:
 - **Runtime** — React 19, React Router v7
 - **Dev tooling** — Vite 8, TypeScript 6, ESLint, Electron 41
 - **Packaging** — electron-builder
+
+> **If the Electron binary download fails** (`unable to verify the first certificate`, `ECONNRESET`, or a stalled `postinstall`), the install is trying to reach GitHub. Point it at a mirror once per machine, reopen the terminal, then reinstall:
+>
+> ```powershell
+> setx ELECTRON_MIRROR "https://npmmirror.com/mirrors/electron/"
+> setx ELECTRON_BUILDER_BINARIES_MIRROR "https://npmmirror.com/mirrors/electron-builder-binaries/"
+> ```
+>
+> The second variable is only used by `npm run dist:win` (electron-builder downloads its NSIS helpers from GitHub).
 
 ### 3. Development Workflow
 
@@ -254,7 +267,7 @@ The NSIS installer lands in `release/` as `Pixium-<version>-x64-setup.exe`.
 
 ### 5. Verify Everything Works
 
-After cloning and running `npm install`, confirm the toolchain is healthy:
+After cloning and running `npm ci`, confirm the toolchain is healthy:
 
 ```bash
 # Type-check the renderer (no emit)
@@ -273,13 +286,15 @@ npm run build
 npm run build:electron
 ```
 
-All five commands should exit cleanly with no errors. If they pass, `npm start` will launch the app.
+All five commands should exit successfully. `npm run lint` must report zero errors; it may print a few `react-hooks/exhaustive-deps` warnings for callbacks that intentionally keep a narrow dependency list. If all five pass, `npm start` will launch the app.
 
 ### Common Issues
 
 | Symptom                                      | Likely Fix                                                   |
 | -------------------------------------------- | ------------------------------------------------------------ |
-| `Cannot find module 'electron'`              | Run `npm install` — Electron is a devDependency              |
+| `Cannot find module 'electron'`              | Run `npm ci` — Electron is a devDependency                   |
+| `npm ci` fails downloading Electron          | Set `ELECTRON_MIRROR` (see [Install Dependencies](#2-install-dependencies)) and re-run |
+| `Unsupported engine` / Vite fails to start   | Node.js is too old — install Node 22 LTS (Vite 8 needs ≥ 20.19) |
 | `'electron' is not recognized`               | Add `node_modules/.bin` to PATH or use `npx electron .`      |
 | White screen on launch                       | Vite dev server hasn't started — wait a few seconds, then refresh with Ctrl+R |
 | `EPERM` or permission errors on Windows      | Close any File Explorer windows inside the project folder    |
@@ -292,7 +307,7 @@ Quick reference for the npm scripts you'll use most often:
 
 | Command                    | Description                                              |
 | -------------------------- | -------------------------------------------------------- |
-| `npm install`              | Install all dependencies                                 |
+| `npm ci`                   | Install exact dependency versions from the lockfile      |
 | `npm start`                | Full dev mode — Vite HMR + Electron                      |
 | `npm run start:packaged`   | Dev mode simulating packaged app (reads from `%APPDATA%`) |
 | `npm run dev`              | Browser-only UI dev (no Electron APIs)                   |
