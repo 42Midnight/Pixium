@@ -1,5 +1,7 @@
 # Pixium
 
+> **Status:** This project is no longer under active development. The code is kept here for reference; issues and pull requests may not be reviewed.
+
 A local-first desktop application that stores images together with their supporting structured text information. Browse your images in a waterfall layout and organize them by albums to keep all content neatly arranged.
 
 > 中文文档请见 [README\_CN.md](./README_CN.md)
