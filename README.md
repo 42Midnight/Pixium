@@ -89,6 +89,8 @@ All data lives on your local file system, stored under `%APPDATA%/Pixium/`.
 | ------------- | -------------- |
 | Windows (x64) | NSIS installer |
 
+Prebuilt installers are published under [Releases](https://github.com/42Midnight/Pixium/releases); `v1.0.0-20260808` is the final build (commit `2a55b34`). The section below describes building from source.
+
 ## Tech Stack
 
 | Layer         | Technology                                   |
